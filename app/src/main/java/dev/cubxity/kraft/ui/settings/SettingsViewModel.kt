@@ -16,5 +16,10 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-include ':app'
-rootProject.name = "Kraft"
+package dev.cubxity.kraft.ui.settings
+
+import androidx.lifecycle.ViewModel
+
+class SettingsViewModel : ViewModel() {
+
+}
