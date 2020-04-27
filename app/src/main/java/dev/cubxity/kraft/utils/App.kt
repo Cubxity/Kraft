@@ -16,16 +16,22 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package dev.cubxity.kraft.db.entity
+package dev.cubxity.kraft.utils
 
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import android.content.Context
+import androidx.core.content.edit
+import java.util.*
 
-@Entity(tableName = "accounts")
-data class Account(
-    @PrimaryKey @ColumnInfo(name = "uuid") val uuid: String,
-    @ColumnInfo(name = "username") val username: String,
-    @ColumnInfo(name = "login") val login: String?,
-    @ColumnInfo(name = "access_token") val accessToken: String?
-)
+val Context.clientToken: UUID
+    get() {
+        val prefs = getSharedPreferences("minecraft", Context.MODE_PRIVATE)
+        return if (prefs.contains("client_token")) {
+            UUID.fromString(prefs.getString("client_token", null))
+        } else {
+            val token = UUID.randomUUID()
+            prefs.edit(commit = true) {
+                putString("client_token", "$token")
+            }
+            token
+        }
+    }
