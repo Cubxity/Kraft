@@ -16,23 +16,24 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package dev.cubxity.kraft.db.entity
+package dev.cubxity.kraft.mc.impl.entity
 
-import androidx.room.ColumnInfo
-import androidx.room.Embedded
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import com.github.steveice10.mc.protocol.data.game.entity.metadata.EntityMetadata
+import com.github.steveice10.mc.protocol.data.game.entity.type.`object`.ObjectData
+import dev.cubxity.kraft.mc.entitiy.Entity
+import java.util.*
 
-@Entity(tableName = "sessions")
-data class Session(
-    @PrimaryKey(autoGenerate = true) val id: Int?,
-    @ColumnInfo(name = "name") var name: String,
-    @Embedded val account: Account,
-    @ColumnInfo(name = "server_host") var serverHost: String,
-    @ColumnInfo(name = "server_port") var serverPort: Int = 25565
-) {
-    companion object {
-        fun create(name: String, account: Account, serverHost: String, serverPort: Int) =
-            Session(null, name, account, serverHost, serverPort)
-    }
+open class BaseEntity(override val entityId: Int, override val uuid: UUID) : Entity {
+    override var data: ObjectData? = null
+
+    override var x: Double = 0.0
+    override var y: Double = 0.0
+    override var z: Double = 0.0
+    override var pitch: Float = 0F
+    override var yaw: Float = 0F
+    override var velocityX: Double = 0.0
+    override var velocityY: Double = 0.0
+    override var velocityZ: Double = 0.0
+
+    override var metadata: Array<EntityMetadata> = emptyArray()
 }

@@ -16,23 +16,23 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package dev.cubxity.kraft.db.entity
+package dev.cubxity.kraft.mc
 
-import androidx.room.ColumnInfo
-import androidx.room.Embedded
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import dev.cubxity.kraft.db.entity.Session
 
-@Entity(tableName = "sessions")
-data class Session(
-    @PrimaryKey(autoGenerate = true) val id: Int?,
-    @ColumnInfo(name = "name") var name: String,
-    @Embedded val account: Account,
-    @ColumnInfo(name = "server_host") var serverHost: String,
-    @ColumnInfo(name = "server_port") var serverPort: Int = 25565
-) {
-    companion object {
-        fun create(name: String, account: Account, serverHost: String, serverPort: Int) =
-            Session(null, name, account, serverHost, serverPort)
-    }
+interface SessionManager {
+    /**
+     * @return active game sessions
+     */
+    fun getSessions(): List<GameSession>
+
+    /**
+     * @return active game session from [session] spec
+     */
+    fun getSession(session: Session): GameSession?
+
+    /**
+     * @return the created game session from [session] spec
+     */
+    fun createSession(session: Session): GameSession
 }

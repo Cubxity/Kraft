@@ -27,5 +27,5 @@ data class Account(
     @PrimaryKey @ColumnInfo(name = "uuid") val uuid: String,
     @ColumnInfo(name = "username") val username: String,
     @ColumnInfo(name = "login") val login: String?,
-    @ColumnInfo(name = "access_token") val accessToken: String?
+    @ColumnInfo(name = "access_token") var accessToken: String?
 )

@@ -16,23 +16,15 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package dev.cubxity.kraft.db.entity
+package dev.cubxity.kraft.mc.impl.entity
 
-import androidx.room.ColumnInfo
-import androidx.room.Embedded
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import dev.cubxity.kraft.mc.entitiy.SelfPlayer
+import java.util.*
 
-@Entity(tableName = "sessions")
-data class Session(
-    @PrimaryKey(autoGenerate = true) val id: Int?,
-    @ColumnInfo(name = "name") var name: String,
-    @Embedded val account: Account,
-    @ColumnInfo(name = "server_host") var serverHost: String,
-    @ColumnInfo(name = "server_port") var serverPort: Int = 25565
-) {
-    companion object {
-        fun create(name: String, account: Account, serverHost: String, serverPort: Int) =
-            Session(null, name, account, serverHost, serverPort)
-    }
+class SelfPlayerImpl(entityId: Int, uuid: UUID) : BaseEntity(entityId, uuid), SelfPlayer {
+    override var health = 0F
+
+    override var food = 0
+
+    override var foodSaturation = 0F
 }
