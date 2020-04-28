@@ -26,8 +26,7 @@
     <string name="username">Username</string>
     <string name="password">Password</string>
     <string name="title_activity_session">SessionActivity</string>
-    <string name="tab_text_1">Tab 1</string>
-    <string name="tab_text_2">Tab 2</string>
+    <string name="tab_chat">Chat</string>
     <string name="port">Port</string>
     <string name="host">Host</string>
     <string name="session_name">Session name</string>

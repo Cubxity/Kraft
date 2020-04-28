@@ -18,20 +18,28 @@
 
 package dev.cubxity.kraft.ui.main
 
-import androidx.lifecycle.LiveData
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import com.github.steveice10.mc.protocol.data.message.Message
+import dev.cubxity.kraft.KraftApplication
+import dev.cubxity.kraft.db.entity.SessionWithAccount
+import dev.cubxity.kraft.mc.GameSession
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
-class SessionViewModel : ViewModel() {
+class SessionViewModel(app: Application) : AndroidViewModel(app), GameSession.Listener {
+    val gameSession = MutableLiveData<GameSession>()
+    val log = MutableLiveData("")
 
-    private val _index = MutableLiveData<Int>()
-    val text: LiveData<String> = Transformations.map(_index) {
-        "Hello world from section: $it"
+    fun fetchGameSession(session: SessionWithAccount) = viewModelScope.launch(Dispatchers.IO) {
+        val app: KraftApplication = getApplication()
+        gameSession.postValue(app.sessionManager.getSession(session))
     }
 
-    fun setIndex(index: Int) {
-        _index.value = index
+    override fun onChat(message: Message) {
+        log.postValue(log.value + "\n" + message.fullText)
     }
 }

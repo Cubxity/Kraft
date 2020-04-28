@@ -20,15 +20,23 @@ package dev.cubxity.kraft
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import dev.cubxity.kraft.db.entity.SessionWithAccount
 import dev.cubxity.kraft.ui.main.SectionsPagerAdapter
 import kotlinx.android.synthetic.main.activity_session.*
 
 class SessionActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val session: SessionWithAccount? = intent.getParcelableExtra("session")
+        if (session == null) {
+            finish()
+            return
+        }
+
         setContentView(R.layout.activity_session)
 
-        val sectionsPagerAdapter = SectionsPagerAdapter(this, supportFragmentManager)
+        val sectionsPagerAdapter = SectionsPagerAdapter(this, session, supportFragmentManager)
 
         val viewPager = view_pager
         viewPager.adapter = sectionsPagerAdapter

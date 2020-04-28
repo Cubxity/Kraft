@@ -55,7 +55,7 @@ class KraftService : Service(), CoroutineScope, GameSession.Listener {
     private val binder = KraftBinder()
     private var isForeground: Boolean = false
 
-    val sessions = ConcurrentHashMap<SessionWithAccount, LocalGameSession>()
+    val sessions = HashMap<SessionWithAccount, LocalGameSession>()
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         launch {

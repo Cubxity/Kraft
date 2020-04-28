@@ -69,4 +69,5 @@ class SessionsViewModel(app: Application) : AndroidViewModel(app) {
 
         sessions.postValue(sessions.value!! - session)
     }
+
 }

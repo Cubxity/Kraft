@@ -43,12 +43,9 @@ suspend fun Context.refreshAndConnect(
     service.username = session.account.username
     service.accessToken = session.account.accessToken
 
-    println(session.account.accessToken)
-
     withContext(Dispatchers.IO) {
         try {
             service.login() // Refreshing the token
-            println(service.accessToken)
         } catch (e: Exception) {
             Log.e(null, "An error occurred whilst logging in", e)
         }

@@ -24,7 +24,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
 import dev.cubxity.kraft.R
+import dev.cubxity.kraft.db.entity.SessionWithAccount
+import kotlinx.android.synthetic.main.fragment_session.*
 
 class SessionFragment : Fragment() {
     private val sessionViewModel: SessionViewModel by activityViewModels()
@@ -34,23 +37,33 @@ class SessionFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_session, container, false)
 
-    companion object {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private const val ARG_SECTION_NUMBER = "section_number"
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        sessionViewModel.log.observe(viewLifecycleOwner, Observer {
+            logs.text = it
+        })
+        sessionViewModel.gameSession.observe(viewLifecycleOwner, Observer {
+            it?.addListener(sessionViewModel)
+        })
 
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
+        val session: SessionWithAccount? = arguments?.getParcelable("session")
+        session?.also { sessionViewModel.fetchGameSession(it) }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        sessionViewModel.gameSession.apply {
+            value?.removeListener(sessionViewModel)
+            value = null
+        }
+    }
+
+    companion object {
+        private const val ARG_SESSION = "session"
+
         @JvmStatic
-        fun newInstance(sectionNumber: Int): SessionFragment {
-            return SessionFragment().apply {
-                arguments = Bundle().apply {
-                    putInt(ARG_SECTION_NUMBER, sectionNumber)
-                }
+        fun newInstance(session: SessionWithAccount) = SessionFragment().apply {
+            arguments = Bundle().apply {
+                putParcelable(ARG_SESSION, session)
             }
         }
     }
