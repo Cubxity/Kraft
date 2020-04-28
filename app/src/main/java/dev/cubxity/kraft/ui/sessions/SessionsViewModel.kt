@@ -27,9 +27,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import dev.cubxity.kraft.KraftApplication
 import dev.cubxity.kraft.SessionActivity
-import dev.cubxity.kraft.db.entity.Session
+import dev.cubxity.kraft.db.entity.SessionWithAccount
 import dev.cubxity.kraft.utils.UIUtils
-import dev.cubxity.kraft.utils.clientToken
 import dev.cubxity.kraft.utils.db
 import dev.cubxity.kraft.utils.refreshAndConnect
 import kotlinx.coroutines.Dispatchers
@@ -41,22 +40,33 @@ class SessionsViewModel(app: Application) : AndroidViewModel(app) {
         private const val TAG = "SessionsViewModel"
     }
 
-    val sessions = MutableLiveData<List<Session>>(emptyList())
+    val sessions = MutableLiveData<List<SessionWithAccount>>(emptyList())
 
     fun fetchSessions(ctx: Context) = viewModelScope.launch(Dispatchers.IO) {
-        sessions.postValue(ctx.db.sessionsDao().getSessions())
+        sessions.postValue(ctx.db.sessionsDao().getSessionsWithAccount())
     }
 
     fun createSession(ctx: Activity) = viewModelScope.launch(Dispatchers.Default) {
         val session = withContext(Dispatchers.Main) { UIUtils.createSession(ctx) } ?: return@launch
         val app: KraftApplication = getApplication()
 
-        withContext(Dispatchers.IO) { app.db.sessionsDao().addSession(session) }
+        withContext(Dispatchers.IO) { app.db.sessionsDao().addSession(session.session) }
 
-        ctx.refreshAndConnect(app.clientToken, session, app.sessionManager::createSession)
+        sessions.postValue(sessions.value!! + session)
+
+        ctx.refreshAndConnect(session, app.sessionManager::createSession)
 
         val intent = Intent(ctx, SessionActivity::class.java)
         intent.putExtra("session", session)
         ctx.startActivity(intent)
+    }
+
+    fun removeSession(session: SessionWithAccount) = viewModelScope.launch(Dispatchers.IO) {
+        val app: KraftApplication = getApplication()
+
+        app.db.sessionsDao().deleteSession(session.session)
+        app.sessionManager.removeSession(session)
+
+        sessions.postValue(sessions.value!! - session)
     }
 }

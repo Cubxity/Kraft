@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:name=".KraftApplication"
@@ -16,7 +17,7 @@
         <activity
             android:name=".SessionActivity"
             android:label="@string/title_activity_session"
-            android:theme="@style/Theme.App.NoActionBar"></activity>
+            android:theme="@style/Theme.App.NoActionBar" />
 
         <service android:name=".service.KraftService" />
 

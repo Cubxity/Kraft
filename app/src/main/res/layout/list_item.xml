@@ -30,7 +30,8 @@
     app:cardBackgroundColor="#aa000000"
     app:cardElevation="0dp"
     app:strokeColor="@color/stroke_color"
-    app:strokeWidth="1dp">
+    app:strokeWidth="1dp"
+    android:id="@+id/item_card">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"

@@ -22,7 +22,7 @@ import android.content.Context
 import androidx.core.content.edit
 import java.util.*
 
-val Context.clientToken: UUID
+var Context.clientToken: UUID
     get() {
         val prefs = getSharedPreferences("minecraft", Context.MODE_PRIVATE)
         return if (prefs.contains("client_token")) {
@@ -33,5 +33,11 @@ val Context.clientToken: UUID
                 putString("client_token", "$token")
             }
             token
+        }
+    }
+    set(value) {
+        val prefs = getSharedPreferences("minecraft", Context.MODE_PRIVATE)
+        prefs.edit(commit = true) {
+            putString("client_token", "$value")
         }
     }

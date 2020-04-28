@@ -18,14 +18,16 @@
 
 package dev.cubxity.kraft.mc
 
+import com.github.steveice10.mc.auth.data.GameProfile
 import com.github.steveice10.mc.protocol.data.message.Message
 import dev.cubxity.kraft.db.entity.Session
+import dev.cubxity.kraft.db.entity.SessionWithAccount
 import dev.cubxity.kraft.mc.entitiy.Entity
 import dev.cubxity.kraft.mc.entitiy.SelfPlayer
 import java.util.*
 
 interface GameSession {
-    val info: Session
+    val info: SessionWithAccount
 
     val state: State
 
@@ -35,7 +37,7 @@ interface GameSession {
 
     val isActive: Boolean
 
-    fun connect(clientToken: UUID)
+    fun connect(profile: GameProfile, clientToken: UUID)
 
     fun disconnect()
 

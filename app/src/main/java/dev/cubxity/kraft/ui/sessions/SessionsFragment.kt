@@ -18,6 +18,7 @@
 
 package dev.cubxity.kraft.ui.sessions
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -27,11 +28,13 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.cubxity.kraft.R
+import dev.cubxity.kraft.SessionActivity
+import dev.cubxity.kraft.db.entity.Session
+import dev.cubxity.kraft.db.entity.SessionWithAccount
 import dev.cubxity.kraft.ui.SessionAdapter
-import kotlinx.android.synthetic.main.fragment_accounts.*
 import kotlinx.android.synthetic.main.fragment_sessions.*
 
-class SessionsFragment : Fragment() {
+class SessionsFragment : Fragment(), SessionAdapter.ActionHandler {
     private val sessionsViewModel: SessionsViewModel by viewModels()
 
     override fun onCreateView(
@@ -43,7 +46,7 @@ class SessionsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val activity = requireActivity()
 
-        val adapter = SessionAdapter(activity)
+        val adapter = SessionAdapter(activity, this)
 
         val recyclerView = sessions_recycler
         recyclerView.layoutManager =
@@ -60,5 +63,17 @@ class SessionsFragment : Fragment() {
         create_session.setOnClickListener {
             sessionsViewModel.createSession(activity)
         }
+    }
+
+    override fun removeSession(session: SessionWithAccount) {
+        sessionsViewModel.removeSession(session)
+    }
+
+    override fun openSession(session: SessionWithAccount) {
+        val ctx = requireContext()
+
+        val intent = Intent(ctx, SessionActivity::class.java)
+        intent.putExtra("session", session)
+        ctx.startActivity(intent)
     }
 }

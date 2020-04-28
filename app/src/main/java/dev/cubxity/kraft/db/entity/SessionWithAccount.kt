@@ -19,27 +19,12 @@
 package dev.cubxity.kraft.db.entity
 
 import android.os.Parcelable
-import androidx.room.*
+import androidx.room.Embedded
+import androidx.room.Relation
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-@Entity(
-    tableName = "sessions",
-    foreignKeys = [ForeignKey(
-        entity = Account::class,
-        parentColumns = ["uuid"],
-        childColumns = ["account_uuid"]
-    )]
-)
-data class Session(
-    @PrimaryKey(autoGenerate = true) val id: Int?,
-    @ColumnInfo(name = "name") var name: String,
-    @ColumnInfo(name = "account_uuid") val accountUUID: String,
-    @ColumnInfo(name = "server_host") var serverHost: String,
-    @ColumnInfo(name = "server_port") var serverPort: Int = 25565
-) : Parcelable {
-    companion object {
-        fun create(name: String, account: Account, serverHost: String, serverPort: Int) =
-            SessionWithAccount(Session(null, name, account.uuid, serverHost, serverPort), account)
-    }
-}
+data class SessionWithAccount(
+    @Embedded val session: Session,
+    @Relation(parentColumn = "account_uuid", entityColumn = "uuid") val account: Account
+) : Parcelable

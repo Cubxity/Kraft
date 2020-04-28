@@ -27,7 +27,7 @@ import dev.cubxity.kraft.db.dao.SessionsDao
 import dev.cubxity.kraft.db.entity.Account
 import dev.cubxity.kraft.db.entity.Session
 
-@Database(entities = [Account::class, Session::class], version = 1)
+@Database(entities = [Account::class, Session::class], version = 2)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun accountsDao(): AccountsDao
 

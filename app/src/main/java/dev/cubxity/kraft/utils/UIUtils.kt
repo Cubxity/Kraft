@@ -27,6 +27,7 @@ import androidx.appcompat.app.AlertDialog
 import dev.cubxity.kraft.R
 import dev.cubxity.kraft.db.entity.Account
 import dev.cubxity.kraft.db.entity.Session
+import dev.cubxity.kraft.db.entity.SessionWithAccount
 import kotlinx.android.synthetic.main.dialog_create_session.*
 import kotlinx.android.synthetic.main.dialog_create_session.view.*
 import kotlinx.android.synthetic.main.dialog_login.*
@@ -53,7 +54,7 @@ object UIUtils {
             .show()
     }
 
-    suspend fun createSession(ctx: Activity): Session? {
+    suspend fun createSession(ctx: Activity): SessionWithAccount? {
         val accounts = withContext(Dispatchers.IO) { ctx.db.accountsDao().getAccounts() }
 
         return suspendCoroutine { c ->

@@ -19,7 +19,9 @@
 package dev.cubxity.kraft.mc.impl.local
 
 import android.util.Log
+import com.github.steveice10.mc.auth.data.GameProfile
 import com.github.steveice10.mc.protocol.MinecraftProtocol
+import com.github.steveice10.mc.protocol.data.game.MessageType
 import com.github.steveice10.mc.protocol.packet.ingame.client.ClientChatPacket
 import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionRotationPacket
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerChatPacket
@@ -38,6 +40,7 @@ import com.github.steveice10.packetlib.event.session.SessionAdapter
 import com.github.steveice10.packetlib.packet.Packet
 import com.github.steveice10.packetlib.tcp.TcpSessionFactory
 import dev.cubxity.kraft.db.entity.Session
+import dev.cubxity.kraft.db.entity.SessionWithAccount
 import dev.cubxity.kraft.mc.GameSession
 import dev.cubxity.kraft.mc.entitiy.Entity
 import dev.cubxity.kraft.mc.entitiy.SelfPlayer
@@ -48,7 +51,7 @@ import java.lang.Exception
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 
-class LocalGameSession(override val info: Session) : SessionAdapter(), GameSession, CoroutineScope {
+class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter(), GameSession, CoroutineScope {
     companion object {
         private const val TAG = "LocalGameSession"
     }
@@ -67,17 +70,18 @@ class LocalGameSession(override val info: Session) : SessionAdapter(), GameSessi
     override var player: SelfPlayer? = null
     override val entities = mutableMapOf<Int, Entity>()
     override val isActive: Boolean
-        get() = client?.session?.isConnected == true
+        get() = state != GameSession.State.DISCONNECTED || client?.session?.isConnected == true
 
     private val listeners = CopyOnWriteArrayList<GameSession.Listener>()
 
-    override fun connect(clientToken: UUID) {
+    override fun connect(profile: GameProfile, clientToken: UUID) {
         if (client != null) disconnect()
         state = GameSession.State.CONNECTING
 
         val account = info.account
-        val protocol = MinecraftProtocol(account.username, "$clientToken", account.accessToken)
-        val client = Client(info.serverHost, info.serverPort, protocol, TcpSessionFactory())
+        val protocol = MinecraftProtocol(profile, "$clientToken", account.accessToken)
+
+        val client = Client(info.session.serverHost, info.session.serverPort, protocol, TcpSessionFactory())
         client.session.addListener(this)
         client.session.connect()
 
@@ -136,7 +140,8 @@ class LocalGameSession(override val info: Session) : SessionAdapter(), GameSessi
 
     override fun packetReceived(event: PacketReceivedEvent) {
         when (val packet: Packet = event.getPacket()) {
-            is ServerChatPacket -> listeners.forEach { it.onChat(packet.message) }
+            is ServerChatPacket -> if (packet.type == MessageType.CHAT)
+                listeners.forEach { it.onChat(packet.message) }
             is ServerJoinGamePacket -> {
                 entityId = packet.entityId
             }

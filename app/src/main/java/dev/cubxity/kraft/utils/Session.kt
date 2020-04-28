@@ -22,6 +22,7 @@ import android.content.Context
 import android.util.Log
 import com.github.steveice10.mc.auth.service.AuthenticationService
 import dev.cubxity.kraft.db.entity.Session
+import dev.cubxity.kraft.db.entity.SessionWithAccount
 import dev.cubxity.kraft.mc.GameSession
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -31,32 +32,38 @@ import java.util.*
  * @param configure configure [GameSession] before connecting
  */
 suspend fun Context.refreshAndConnect(
-    clientToken: UUID,
-    session: Session,
-    createSession: suspend (Session) -> GameSession,
+    session: SessionWithAccount,
+    createSession: suspend (SessionWithAccount) -> GameSession,
     configure: GameSession.() -> Unit = {}
 ) {
+    val clientToken = clientToken
+
+    Log.d(null, "Client token: $clientToken")
     val service = AuthenticationService("$clientToken")
+    service.username = session.account.username
     service.accessToken = session.account.accessToken
+
+    println(session.account.accessToken)
 
     withContext(Dispatchers.IO) {
         try {
             service.login() // Refreshing the token
+            println(service.accessToken)
         } catch (e: Exception) {
             Log.e(null, "An error occurred whilst logging in", e)
         }
     }
 
     session.account.accessToken = service.accessToken
-    session.account.username = service.username
+    session.account.username = service.selectedProfile.name
 
     withContext(Dispatchers.IO) {
         try {
-            db.sessionsDao().updateSession(session)
+            db.accountsDao().updateAccount(session.account)
         } catch (e: Exception) {
-            Log.e(null, "An error occurred whilst updating session", e)
+            Log.e(null, "An error occurred whilst updating account", e)
         }
     }
 
-    createSession(session).apply(configure).connect(clientToken)
+    createSession(session).apply(configure).connect(service.selectedProfile, clientToken)
 }

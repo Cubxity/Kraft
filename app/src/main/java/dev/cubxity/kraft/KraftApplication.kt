@@ -19,8 +19,13 @@
 package dev.cubxity.kraft
 
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import dev.cubxity.kraft.mc.impl.local.LocalSessionManager
 import dev.cubxity.kraft.service.KraftService
 
@@ -34,8 +39,14 @@ class KraftApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) createNotificationChannel()
+
         try {
-            startService(Intent(this, KraftService::class.java))
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(Intent(this, KraftService::class.java))
+            } else {
+                startService(Intent(this, KraftService::class.java))
+            }
         } catch (e: Exception) {
             Log.e(TAG, "An error occurred whilst starting the service", e)
         }
@@ -47,5 +58,18 @@ class KraftApplication : Application() {
         super.onTerminate()
 
         sessionManager.stop()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createNotificationChannel() {
+        val service = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        val channel = NotificationChannel(
+            KraftService.CHANNEL_ID,
+            "Kraft Sessions Service",
+            NotificationManager.IMPORTANCE_HIGH
+        )
+
+        service.createNotificationChannel(channel)
     }
 }

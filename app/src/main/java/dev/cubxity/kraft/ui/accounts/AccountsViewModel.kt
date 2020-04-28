@@ -49,7 +49,10 @@ class AccountsViewModel : ViewModel() {
             ?: return@launch
         val db = ctx.db
 
-        val service = AuthenticationService(ctx.clientToken.toString())
+        val clientToken = ctx.clientToken
+
+        Log.d(TAG, "Client token: $clientToken")
+        val service = AuthenticationService("$clientToken")
         service.username = login
         service.password = pass
 
@@ -76,6 +79,20 @@ class AccountsViewModel : ViewModel() {
     }
 
     fun removeAccount(ctx: Context, account: Account) = viewModelScope.launch(Dispatchers.IO) {
+        val service = AuthenticationService(ctx.clientToken.toString())
+
+        service.username = account.username
+        service.accessToken = account.accessToken
+
+        withContext(Dispatchers.IO) {
+            try {
+                service.login() // You need to login before logging out
+                service.logout()
+            } catch (e: Exception) {
+                Log.w(TAG, "Unable to logout", e)
+            }
+        }
+
         ctx.db.accountsDao().deleteAccount(account)
         accounts.postValue(accounts.value!! - account)
     }

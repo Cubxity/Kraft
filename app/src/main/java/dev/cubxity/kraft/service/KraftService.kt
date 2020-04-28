@@ -30,8 +30,10 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.github.steveice10.mc.auth.service.AuthenticationService
+import com.github.steveice10.mc.protocol.data.message.Message
 import dev.cubxity.kraft.R
 import dev.cubxity.kraft.db.entity.Session
+import dev.cubxity.kraft.db.entity.SessionWithAccount
 import dev.cubxity.kraft.mc.GameSession
 import dev.cubxity.kraft.mc.impl.local.LocalGameSession
 import dev.cubxity.kraft.utils.clientToken
@@ -45,34 +47,32 @@ class KraftService : Service(), CoroutineScope, GameSession.Listener {
 
     companion object {
         private const val TAG = "KraftService"
-        private const val NOTIFICATION_ID = 0
-        private const val CHANNEL_ID = "sessions_service"
+        private const val NOTIFICATION_ID = 1
+
+        const val CHANNEL_ID = "sessions_service"
     }
 
     private val binder = KraftBinder()
-    private val isForeground: Boolean
-        get() {
-            val appProcessInfo = ActivityManager.RunningAppProcessInfo();
-            return appProcessInfo.importance == IMPORTANCE_FOREGROUND || appProcessInfo.importance == IMPORTANCE_VISIBLE
-        }
+    private var isForeground: Boolean = false
 
-    val sessions = ConcurrentHashMap<Session, LocalGameSession>()
+    val sessions = ConcurrentHashMap<SessionWithAccount, LocalGameSession>()
 
-    override fun onCreate() {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         launch {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) createNotificationChannel()
-
-            val sessions = db.sessionsDao().getSessions()
-            val clientToken = clientToken
+            val sessions = db.sessionsDao().getSessionsWithAccount()
 
             if (sessions.isNotEmpty()) startForeground()
 
-            sessions.map {
-                async(Dispatchers.Default) {
-                    refreshAndConnect(clientToken, it, ::createSession)
+            Log.i(TAG, "Resuming ${sessions.size} session(s)")
+            sessions.forEach {
+                try {
+                    refreshAndConnect(it, ::createSession)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Unable to connect to the server", e)
                 }
-            }.awaitAll()
+            }
         }
+        return super.onStartCommand(intent, flags, startId)
     }
 
     override fun onDestroy() {
@@ -86,16 +86,21 @@ class KraftService : Service(), CoroutineScope, GameSession.Listener {
                     }
                     session.removeListener(this@KraftService)
                 }
-            }
+            }.awaitAll()
         }
     }
 
     override fun onBind(intent: Intent?) = binder
 
     override fun onStateChanged(state: GameSession.State) {
-        if (sessions.none { (_, session) -> session.isActive }) {
+        Log.d(TAG, "State changed: $state")
+
+        if (state == GameSession.State.DISCONNECTED && sessions.none { (_, session) -> session.isActive }) {
             // If there are no sessions active and the service is currently running in foreground
-            if (isForeground) stopForeground(true)
+            if (isForeground) {
+                Log.i(TAG, "Running service as background")
+                stopForeground(true)
+            }
         } else {
             // Update the current notification
             if (isForeground) {
@@ -109,16 +114,22 @@ class KraftService : Service(), CoroutineScope, GameSession.Listener {
         }
     }
 
-    suspend fun createSession(session: Session): LocalGameSession =
+    override fun onChat(message: Message) {
+        println(message.fullText)
+    }
+
+    suspend fun createSession(session: SessionWithAccount): LocalGameSession =
         sessions.getOrPut(session) { LocalGameSession(session).apply { addListener(this@KraftService) } }
 
-    fun removeSession(session: Session) {
+    fun removeSession(session: SessionWithAccount) {
         val gameSession = sessions.remove(session) ?: return
         gameSession.disconnect()
         gameSession.removeListener(this)
     }
 
     private fun startForeground() {
+        Log.i(TAG, "Running service as foreground")
+        isForeground = true
         startForeground(NOTIFICATION_ID, createNotification())
     }
 
@@ -132,22 +143,6 @@ class KraftService : Service(), CoroutineScope, GameSession.Listener {
             .setContentText("$activeSessions sessions active")
             .setCategory(Notification.CATEGORY_SERVICE)
             .build()
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun createNotificationChannel(): String {
-        val channelId = "sessions_service"
-        val channelName = "Kraft Sessions Service"
-        val chan = NotificationChannel(
-            channelId,
-            channelName, NotificationManager.IMPORTANCE_HIGH
-        )
-        chan.lightColor = Color.GREEN
-        chan.importance = NotificationManager.IMPORTANCE_NONE
-        chan.lockscreenVisibility = Notification.VISIBILITY_PRIVATE
-        val service = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        service.createNotificationChannel(chan)
-        return channelId
     }
 
     inner class KraftBinder internal constructor() : Binder() {

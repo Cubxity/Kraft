@@ -19,6 +19,7 @@
 package dev.cubxity.kraft.mc
 
 import dev.cubxity.kraft.db.entity.Session
+import dev.cubxity.kraft.db.entity.SessionWithAccount
 
 interface SessionManager {
     /**
@@ -29,18 +30,18 @@ interface SessionManager {
     /**
      * @return active game session from [session] spec
      */
-    suspend fun getSession(session: Session): GameSession?
+    suspend fun getSession(session: SessionWithAccount): GameSession?
 
     /**
      * Creating a session, this does not connect
      * @return the created game session from [session] spec
      */
-    suspend fun createSession(session: Session): GameSession
+    suspend fun createSession(session: SessionWithAccount): GameSession
 
     /**
      * Disconnecting from a session and removing it
      */
-    suspend fun removeSession(session: Session)
+    suspend fun removeSession(session: SessionWithAccount)
 
     /**
      * Starts the connection to the daemon

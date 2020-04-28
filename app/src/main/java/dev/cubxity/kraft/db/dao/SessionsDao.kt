@@ -20,11 +20,16 @@ package dev.cubxity.kraft.db.dao
 
 import androidx.room.*
 import dev.cubxity.kraft.db.entity.Session
+import dev.cubxity.kraft.db.entity.SessionWithAccount
 
 @Dao
 interface SessionsDao {
     @Query("SELECT * FROM sessions")
     suspend fun getSessions(): List<Session>
+
+    @Transaction
+    @Query("SELECT * FROM sessions")
+    suspend fun getSessionsWithAccount(): List<SessionWithAccount>
 
     @Update
     suspend fun updateSession(session: Session)
