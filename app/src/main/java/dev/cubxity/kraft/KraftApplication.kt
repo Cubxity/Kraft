@@ -16,39 +16,36 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package dev.cubxity.kraft.mc
+package dev.cubxity.kraft
 
-import dev.cubxity.kraft.db.entity.Session
+import android.app.Application
+import android.content.Intent
+import android.util.Log
+import dev.cubxity.kraft.mc.impl.local.LocalSessionManager
+import dev.cubxity.kraft.service.KraftService
 
-interface SessionManager {
-    /**
-     * @return active game sessions
-     */
-    suspend fun getSessions(): List<GameSession>
+class KraftApplication : Application() {
+    companion object {
+        private const val TAG = "KraftApplication"
+    }
 
-    /**
-     * @return active game session from [session] spec
-     */
-    suspend fun getSession(session: Session): GameSession?
+    val sessionManager = LocalSessionManager(this)
 
-    /**
-     * Creating a session, this does not connect
-     * @return the created game session from [session] spec
-     */
-    suspend fun createSession(session: Session): GameSession
+    override fun onCreate() {
+        super.onCreate()
 
-    /**
-     * Disconnecting from a session and removing it
-     */
-    suspend fun removeSession(session: Session)
+        try {
+            startService(Intent(this, KraftService::class.java))
+        } catch (e: Exception) {
+            Log.e(TAG, "An error occurred whilst starting the service", e)
+        }
 
-    /**
-     * Starts the connection to the daemon
-     */
-    fun start()
+        sessionManager.start()
+    }
 
-    /**
-     * Stops the connection to the daemon
-     */
-    fun stop()
+    override fun onTerminate() {
+        super.onTerminate()
+
+        sessionManager.stop()
+    }
 }

@@ -27,6 +27,8 @@ import java.util.*
 interface GameSession {
     val info: Session
 
+    val state: State
+
     val player: SelfPlayer?
 
     val entities: Map<Int, Entity>
@@ -43,8 +45,17 @@ interface GameSession {
 
     fun removeListener(listener: Listener)
 
+    enum class State {
+        DISCONNECTED,
+        DISCONNECTING,
+        CONNECTING,
+        CONNECTED,
+    }
+
     interface Listener {
         fun onTick() {}
+
+        fun onStateChanged(state: State) {}
 
         fun onConnect() {}
 

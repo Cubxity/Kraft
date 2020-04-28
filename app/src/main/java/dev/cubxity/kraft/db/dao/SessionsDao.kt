@@ -24,14 +24,14 @@ import dev.cubxity.kraft.db.entity.Session
 @Dao
 interface SessionsDao {
     @Query("SELECT * FROM sessions")
-    suspend fun getAccounts(): List<Session>
+    suspend fun getSessions(): List<Session>
 
     @Update
-    suspend fun updateSession(account: Session)
+    suspend fun updateSession(session: Session)
 
     @Insert
-    suspend fun addSession(account: Session)
+    suspend fun addSession(session: Session)
 
     @Delete
-    suspend fun deleteSession(account: Session)
+    suspend fun deleteSession(session: Session)
 }

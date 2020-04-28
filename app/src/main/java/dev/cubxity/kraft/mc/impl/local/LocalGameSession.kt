@@ -18,6 +18,7 @@
 
 package dev.cubxity.kraft.mc.impl.local
 
+import android.util.Log
 import com.github.steveice10.mc.protocol.MinecraftProtocol
 import com.github.steveice10.mc.protocol.packet.ingame.client.ClientChatPacket
 import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionRotationPacket
@@ -43,12 +44,24 @@ import dev.cubxity.kraft.mc.entitiy.SelfPlayer
 import dev.cubxity.kraft.mc.impl.entity.BaseEntity
 import dev.cubxity.kraft.mc.impl.entity.SelfPlayerImpl
 import kotlinx.coroutines.*
+import java.lang.Exception
 import java.util.*
+import java.util.concurrent.CopyOnWriteArrayList
 
 class LocalGameSession(override val info: Session) : SessionAdapter(), GameSession, CoroutineScope {
+    companion object {
+        private const val TAG = "LocalGameSession"
+    }
+
     override val coroutineContext = Dispatchers.Default + Job()
     private var client: Client? = null
     private var job: Job? = null
+
+    override var state: GameSession.State = GameSession.State.DISCONNECTED
+        private set(value) {
+            listeners.forEach { it.onStateChanged(value) }
+            field = value
+        }
 
     private var entityId: Int? = null
     override var player: SelfPlayer? = null
@@ -56,10 +69,11 @@ class LocalGameSession(override val info: Session) : SessionAdapter(), GameSessi
     override val isActive: Boolean
         get() = client?.session?.isConnected == true
 
-    private val listeners = mutableListOf<GameSession.Listener>()
+    private val listeners = CopyOnWriteArrayList<GameSession.Listener>()
 
     override fun connect(clientToken: UUID) {
         if (client != null) disconnect()
+        state = GameSession.State.CONNECTING
 
         val account = info.account
         val protocol = MinecraftProtocol(account.username, "$clientToken", account.accessToken)
@@ -68,9 +82,15 @@ class LocalGameSession(override val info: Session) : SessionAdapter(), GameSessi
         client.session.connect()
 
         job = launch {
-            while (true) {
-                listeners.forEach { it.onTick() }
-                delay(50)
+            try {
+                while (true) {
+                    listeners.forEach { it.onTick() }
+                    delay(50)
+                }
+            } catch (_: CancellationException) {
+                // Ignore
+            } catch (e: Exception) {
+                Log.e(TAG, "An error occurred whilst ticking", e)
             }
         }
 
@@ -79,21 +99,26 @@ class LocalGameSession(override val info: Session) : SessionAdapter(), GameSessi
 
     override fun disconnect() {
         client?.apply {
+            state = GameSession.State.DISCONNECTING
             if (session.isConnected) session.disconnect("Disconnected.")
             session.removeListener(this@LocalGameSession)
             client = null
 
             entityId = null
             player = null
+            job?.cancel()
+            job = null
             entities.clear()
         }
     }
 
     override fun connected(event: ConnectedEvent) {
+        state = GameSession.State.CONNECTED
         listeners.forEach { it.onConnect() }
     }
 
     override fun disconnected(event: DisconnectedEvent) {
+        state = GameSession.State.DISCONNECTED
         listeners.forEach { it.onDisconnect(event.reason) }
     }
 

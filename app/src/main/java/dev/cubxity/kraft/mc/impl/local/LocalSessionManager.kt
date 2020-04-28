@@ -18,20 +18,51 @@
 
 package dev.cubxity.kraft.mc.impl.local
 
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
+import android.os.IBinder
 import dev.cubxity.kraft.db.entity.Session
 import dev.cubxity.kraft.mc.GameSession
 import dev.cubxity.kraft.mc.SessionManager
+import dev.cubxity.kraft.service.KraftService
 
-class LocalSessionManager : SessionManager{
-    override fun getSessions(): List<GameSession> {
-        TODO("Not yet implemented")
+class LocalSessionManager(private val ctx: Context) : SessionManager {
+    private var binder: KraftService.KraftBinder? = null
+
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(className: ComponentName, service: IBinder) {
+            binder = service as KraftService.KraftBinder
+        }
+
+        override fun onServiceDisconnected(className: ComponentName) {
+            binder = null
+        }
     }
 
-    override fun getSession(session: Session): GameSession? {
-        TODO("Not yet implemented")
+    override suspend fun getSessions() =
+        binder?.service?.sessions?.values?.toList() ?: error("Service not found")
+
+    override suspend fun getSession(session: Session) =
+        binder?.service?.sessions?.get(session)
+
+    override suspend fun createSession(session: Session) =
+        binder?.service?.createSession(session) ?: error("Service not bound")
+
+    override suspend fun removeSession(session: Session) =
+        binder?.service?.removeSession(session) ?: error("Service not bound")
+
+    override fun start() {
+        Intent(ctx, KraftService::class.java).also { intent ->
+            ctx.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
+        }
     }
 
-    override fun createSession(session: Session): GameSession {
-        TODO("Not yet implemented")
+    override fun stop() {
+        binder?.also {
+            ctx.unbindService(serviceConnection)
+            binder = null
+        }
     }
 }
