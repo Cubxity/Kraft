@@ -18,10 +18,20 @@
 
 package dev.cubxity.kraft.utils
 
+import android.app.Activity
 import android.content.Context
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import dev.cubxity.kraft.R
+import dev.cubxity.kraft.db.entity.Account
+import dev.cubxity.kraft.db.entity.Session
+import kotlinx.android.synthetic.main.dialog_create_session.*
+import kotlinx.android.synthetic.main.dialog_create_session.view.*
 import kotlinx.android.synthetic.main.dialog_login.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -41,5 +51,66 @@ object UIUtils {
             .setOnCancelListener { c.resume(null) }
             .create()
             .show()
+    }
+
+    suspend fun createSession(ctx: Activity): Session? {
+        val accounts = withContext(Dispatchers.IO) { ctx.db.accountsDao().getAccounts() }
+
+        return suspendCoroutine { c ->
+            val view = ctx.layoutInflater.inflate(R.layout.dialog_create_session, null)
+            val adapter = ArrayAdapter(ctx, R.layout.autocomplete_item, accounts)
+            var selectedAccount: Account? = null
+
+            val autocomplete: AutoCompleteTextView? = view.account_autocomplete
+            autocomplete?.setAdapter(adapter)
+            autocomplete?.setOnItemClickListener { _, _, i, _ ->
+                selectedAccount = adapter.getItem(i)
+            }
+
+            AlertDialog.Builder(ctx)
+                .setTitle("Create session")
+                .setView(view)
+                .setMessage("Please enter the sessions details below")
+                .setNegativeButton("Cancel") { i, _ -> i.cancel() }
+                .setPositiveButton("Create") { i, _ ->
+                    val dialog = i as AlertDialog
+                    val name = dialog.name_field.text.toString()
+                    val host = dialog.host_field.text.toString()
+                    val port = dialog.port_field.text.toString().toInt()
+
+                    val account = selectedAccount
+
+                    when {
+                        account == null -> {
+                            Toast.makeText(
+                                ctx,
+                                R.string.toast_no_account,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            c.resume(null)
+                        }
+                        name.isEmpty() -> {
+                            Toast.makeText(
+                                ctx,
+                                R.string.toast_empty_name,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            c.resume(null)
+                        }
+                        host.isEmpty() -> {
+                            Toast.makeText(
+                                ctx,
+                                R.string.toast_empty_host,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            c.resume(null)
+                        }
+                        else -> c.resume(Session.create(name, account, host, port))
+                    }
+                }
+                .setOnCancelListener { c.resume(null) }
+                .create()
+                .show()
+        }
     }
 }

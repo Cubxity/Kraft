@@ -27,10 +27,11 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.cubxity.kraft.R
+import dev.cubxity.kraft.db.entity.Account
 import dev.cubxity.kraft.ui.AccountAdapter
 import kotlinx.android.synthetic.main.fragment_accounts.*
 
-class AccountsFragment : Fragment() {
+class AccountsFragment : Fragment(), AccountAdapter.ActionHandler {
     private val accountsViewModel: AccountsViewModel by viewModels()
 
     override fun onCreateView(
@@ -42,7 +43,7 @@ class AccountsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val ctx = requireContext()
 
-        val adapter = AccountAdapter(ctx)
+        val adapter = AccountAdapter(ctx, this)
 
         val recyclerView = accounts_recycler
         recyclerView.layoutManager =
@@ -59,5 +60,9 @@ class AccountsFragment : Fragment() {
             adapter.notifyDataSetChanged()
         })
         accountsViewModel.fetchAccounts(ctx)
+    }
+
+    override fun removeAccount(account: Account) {
+        accountsViewModel.removeAccount(requireContext(), account)
     }
 }

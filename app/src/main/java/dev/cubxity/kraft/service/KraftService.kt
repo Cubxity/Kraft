@@ -109,7 +109,7 @@ class KraftService : Service(), CoroutineScope, GameSession.Listener {
         }
     }
 
-    fun createSession(session: Session): LocalGameSession =
+    suspend fun createSession(session: Session): LocalGameSession =
         sessions.getOrPut(session) { LocalGameSession(session).apply { addListener(this@KraftService) } }
 
     fun removeSession(session: Session) {

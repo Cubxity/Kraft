@@ -27,7 +27,7 @@
     android:layout_marginBottom="8dp"
     android:clickable="true"
     android:focusable="true"
-    app:cardBackgroundColor="#ee000000"
+    app:cardBackgroundColor="#aa000000"
     app:cardElevation="0dp"
     app:strokeColor="@color/stroke_color"
     app:strokeWidth="1dp">
@@ -69,9 +69,19 @@
             android:ellipsize="end"
             android:maxLines="2"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/options_button"
             app:layout_constraintStart_toEndOf="@id/card_image"
             app:layout_constraintTop_toBottomOf="@id/card_title"
             tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus pretium fermentum dui nec fermentum. Ut accumsan, mauris sed dapibus tincidunt, erat sapien convallis sem, vel vulputate elit quam ut lectus." />
+
+        <ImageButton
+            android:id="@+id/options_button"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_baseline_more_vert_24"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

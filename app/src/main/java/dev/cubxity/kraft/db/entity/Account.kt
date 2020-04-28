@@ -18,14 +18,19 @@
 
 package dev.cubxity.kraft.db.entity
 
+import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.android.parcel.Parcelize
 
+@Parcelize
 @Entity(tableName = "accounts")
 data class Account(
     @PrimaryKey @ColumnInfo(name = "uuid") val uuid: String,
     @ColumnInfo(name = "username") var username: String,
     @ColumnInfo(name = "login") val login: String?,
     @ColumnInfo(name = "access_token") var accessToken: String?
-)
+) : Parcelable {
+    override fun toString() = username
+}

@@ -16,26 +16,22 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package dev.cubxity.kraft.db.entity
+package dev.cubxity.kraft.ui.main
 
-import android.os.Parcelable
-import androidx.room.ColumnInfo
-import androidx.room.Embedded
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-import kotlinx.android.parcel.Parcelize
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 
-@Parcelize
-@Entity(tableName = "sessions")
-data class Session(
-    @PrimaryKey(autoGenerate = true) val id: Int?,
-    @ColumnInfo(name = "name") var name: String,
-    @Embedded val account: Account,
-    @ColumnInfo(name = "server_host") var serverHost: String,
-    @ColumnInfo(name = "server_port") var serverPort: Int = 25565
-) : Parcelable {
-    companion object {
-        fun create(name: String, account: Account, serverHost: String, serverPort: Int) =
-            Session(null, name, account, serverHost, serverPort)
+class SessionViewModel : ViewModel() {
+
+    private val _index = MutableLiveData<Int>()
+    val text: LiveData<String> = Transformations.map(_index) {
+        "Hello world from section: $it"
+    }
+
+    fun setIndex(index: Int) {
+        _index.value = index
     }
 }

@@ -13,6 +13,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.App">
+        <activity
+            android:name=".SessionActivity"
+            android:label="@string/title_activity_session"
+            android:theme="@style/Theme.App.NoActionBar"></activity>
 
         <service android:name=".service.KraftService" />
 

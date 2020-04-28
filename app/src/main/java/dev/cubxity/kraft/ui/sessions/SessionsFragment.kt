@@ -22,25 +22,43 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
 import dev.cubxity.kraft.R
+import dev.cubxity.kraft.ui.SessionAdapter
+import kotlinx.android.synthetic.main.fragment_accounts.*
+import kotlinx.android.synthetic.main.fragment_sessions.*
 
 class SessionsFragment : Fragment() {
-
-    private lateinit var sessionsViewModel: SessionsViewModel
+    private val sessionsViewModel: SessionsViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        sessionsViewModel =
-            ViewModelProvider(this).get(SessionsViewModel::class.java)
-        val root = inflater.inflate(R.layout.fragment_sessions, container, false)
+    ): View? = inflater.inflate(R.layout.fragment_sessions, container, false)
 
-        return root
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        val activity = requireActivity()
+
+        val adapter = SessionAdapter(activity)
+
+        val recyclerView = sessions_recycler
+        recyclerView.layoutManager =
+            LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
+        recyclerView.adapter = adapter
+
+        sessionsViewModel.sessions.observe(viewLifecycleOwner, Observer {
+            adapter.sessions.clear()
+            adapter.sessions += it
+            adapter.notifyDataSetChanged()
+        })
+        sessionsViewModel.fetchSessions(activity)
+
+        create_session.setOnClickListener {
+            sessionsViewModel.createSession(activity)
+        }
     }
 }

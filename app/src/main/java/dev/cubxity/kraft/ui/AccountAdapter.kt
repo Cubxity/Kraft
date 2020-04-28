@@ -22,14 +22,18 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.TextView
+import android.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.android.material.textview.MaterialTextView
 import dev.cubxity.kraft.R
 import dev.cubxity.kraft.db.entity.Account
+import kotlinx.android.synthetic.main.list_item.view.*
 
-class AccountAdapter(private val ctx: Context) : RecyclerView.Adapter<AccountAdapter.ViewHolder>() {
+class AccountAdapter(private val ctx: Context, private val handler: ActionHandler) :
+    RecyclerView.Adapter<AccountAdapter.ViewHolder>() {
     val accounts = mutableListOf<Account>()
 
     private val layoutInflater = LayoutInflater.from(ctx)
@@ -50,11 +54,31 @@ class AccountAdapter(private val ctx: Context) : RecyclerView.Adapter<AccountAda
 
         holder.title.text = account.username
         holder.description.text = account.uuid
+        holder.optionsButton.setOnClickListener {
+            createMenu(account, it)
+        }
+    }
+
+    private fun createMenu(account: Account, view: View) {
+        val popup = PopupMenu(ctx, view)
+        popup.inflate(R.menu.account_menu)
+        popup.setOnMenuItemClickListener {
+            when (it.itemId) {
+                R.id.remove_account -> handler.removeAccount(account)
+            }
+            true
+        }
+        popup.show()
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val image: ImageView = view.findViewById(R.id.card_image)
-        val title: TextView = view.findViewById(R.id.card_title)
-        val description: TextView = view.findViewById(R.id.card_description)
+        val image: ImageView = view.card_image
+        val title: MaterialTextView = view.card_title
+        val description: MaterialTextView = view.card_description
+        val optionsButton: ImageButton = view.options_button
+    }
+
+    interface ActionHandler {
+        fun removeAccount(account: Account)
     }
 }

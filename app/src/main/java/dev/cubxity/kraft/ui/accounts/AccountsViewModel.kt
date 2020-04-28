@@ -74,4 +74,9 @@ class AccountsViewModel : ViewModel() {
             }
         }
     }
+
+    fun removeAccount(ctx: Context, account: Account) = viewModelScope.launch(Dispatchers.IO) {
+        ctx.db.accountsDao().deleteAccount(account)
+        accounts.postValue(accounts.value!! - account)
+    }
 }

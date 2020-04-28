@@ -18,8 +18,45 @@
 
 package dev.cubxity.kraft.ui.sessions
 
-import androidx.lifecycle.ViewModel
+import android.app.Activity
+import android.app.Application
+import android.content.Context
+import android.content.Intent
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
+import dev.cubxity.kraft.KraftApplication
+import dev.cubxity.kraft.SessionActivity
+import dev.cubxity.kraft.db.entity.Session
+import dev.cubxity.kraft.utils.UIUtils
+import dev.cubxity.kraft.utils.clientToken
+import dev.cubxity.kraft.utils.db
+import dev.cubxity.kraft.utils.refreshAndConnect
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class SessionsViewModel : ViewModel() {
+class SessionsViewModel(app: Application) : AndroidViewModel(app) {
+    companion object {
+        private const val TAG = "SessionsViewModel"
+    }
 
+    val sessions = MutableLiveData<List<Session>>(emptyList())
+
+    fun fetchSessions(ctx: Context) = viewModelScope.launch(Dispatchers.IO) {
+        sessions.postValue(ctx.db.sessionsDao().getSessions())
+    }
+
+    fun createSession(ctx: Activity) = viewModelScope.launch(Dispatchers.Default) {
+        val session = withContext(Dispatchers.Main) { UIUtils.createSession(ctx) } ?: return@launch
+        val app: KraftApplication = getApplication()
+
+        withContext(Dispatchers.IO) { app.db.sessionsDao().addSession(session) }
+
+        ctx.refreshAndConnect(app.clientToken, session, app.sessionManager::createSession)
+
+        val intent = Intent(ctx, SessionActivity::class.java)
+        intent.putExtra("session", session)
+        ctx.startActivity(intent)
+    }
 }

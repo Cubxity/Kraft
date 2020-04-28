@@ -16,26 +16,24 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package dev.cubxity.kraft.db.entity
+package dev.cubxity.kraft
 
-import android.os.Parcelable
-import androidx.room.ColumnInfo
-import androidx.room.Embedded
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-import kotlinx.android.parcel.Parcelize
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import dev.cubxity.kraft.ui.main.SectionsPagerAdapter
+import kotlinx.android.synthetic.main.activity_session.*
 
-@Parcelize
-@Entity(tableName = "sessions")
-data class Session(
-    @PrimaryKey(autoGenerate = true) val id: Int?,
-    @ColumnInfo(name = "name") var name: String,
-    @Embedded val account: Account,
-    @ColumnInfo(name = "server_host") var serverHost: String,
-    @ColumnInfo(name = "server_port") var serverPort: Int = 25565
-) : Parcelable {
-    companion object {
-        fun create(name: String, account: Account, serverHost: String, serverPort: Int) =
-            Session(null, name, account, serverHost, serverPort)
+class SessionActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_session)
+
+        val sectionsPagerAdapter = SectionsPagerAdapter(this, supportFragmentManager)
+
+        val viewPager = view_pager
+        viewPager.adapter = sectionsPagerAdapter
+
+        val tabs = tabs
+        tabs.setupWithViewPager(viewPager)
     }
 }

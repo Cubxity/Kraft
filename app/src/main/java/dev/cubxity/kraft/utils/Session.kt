@@ -33,7 +33,7 @@ import java.util.*
 suspend fun Context.refreshAndConnect(
     clientToken: UUID,
     session: Session,
-    createSession: (Session) -> GameSession,
+    createSession: suspend (Session) -> GameSession,
     configure: GameSession.() -> Unit = {}
 ) {
     val service = AuthenticationService("$clientToken")

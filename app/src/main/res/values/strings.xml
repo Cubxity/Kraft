@@ -25,4 +25,17 @@
     <string name="create_session_description">Create session</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
+    <string name="title_activity_session">SessionActivity</string>
+    <string name="tab_text_1">Tab 1</string>
+    <string name="tab_text_2">Tab 2</string>
+    <string name="port">Port</string>
+    <string name="host">Host</string>
+    <string name="session_name">Session name</string>
+    <string name="account">Account</string>
+    <string name="default_port">25565</string>
+    <string name="empty_name">Name can\'t be empty</string>
+    <string name="toast_empty_name">Name can\'t be empty</string>
+    <string name="toast_empty_host">Host can\'t be empty</string>
+    <string name="toast_no_account">You must select an account</string>
+    <string name="remove_account">Remove account</string>
 </resources>
