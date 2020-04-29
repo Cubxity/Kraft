@@ -148,7 +148,7 @@ class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter()
     override fun packetReceived(event: PacketReceivedEvent) {
         when (val packet: Packet = event.getPacket()) {
             is ServerChatPacket -> if (packet.type == MessageType.CHAT) {
-                log("Chat", ChatUtils.buildSpan(packet.message))
+                log(null, ChatUtils.buildSpan(packet.message))
                 listeners.forEach { it.onChat(packet.message) }
             }
             is ServerJoinGamePacket -> {
@@ -218,7 +218,7 @@ class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter()
     }
 
     private fun log(
-        scope: String,
+        scope: String?,
         content: CharSequence,
         level: GameSession.LogLevel = GameSession.LogLevel.INFO
     ) {
@@ -228,14 +228,14 @@ class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter()
         this.log.postValue(new)
     }
 
-    private fun warn(scope: String, content: CharSequence) =
+    private fun warn(scope: String?, content: CharSequence) =
         log(scope, content, GameSession.LogLevel.WARNING)
 
-    private fun error(scope: String, content: CharSequence) =
+    private fun error(scope: String?, content: CharSequence) =
         log(scope, content, GameSession.LogLevel.ERROR)
 
     private fun success(
-        scope: String,
+        scope: String?,
         content: CharSequence
     ) = log(scope, content, GameSession.LogLevel.SUCCESS)
 }

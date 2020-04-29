@@ -87,8 +87,10 @@ class SessionFragment : Fragment() {
     private fun updateLog(log: List<GameSession.LogEntry>) {
         val spannable = buildSpannedString {
             for (entry in log) {
-                append("[${entry.scope}]", StyleSpan(Typeface.BOLD), 0)
-                append(' ')
+                if (entry.scope != null) {
+                    append("[${entry.scope}]", StyleSpan(Typeface.BOLD), 0)
+                    append(' ')
+                }
                 if (entry.level != GameSession.LogLevel.INFO) {
                     val color = when (entry.level) {
                         GameSession.LogLevel.SUCCESS -> successColor

@@ -75,7 +75,7 @@ interface GameSession {
     }
 
     data class LogEntry(
-        val scope: String,
+        val scope: String?,
         val content: CharSequence,
         val level: LogLevel = LogLevel.INFO
     )
