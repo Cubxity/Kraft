@@ -27,14 +27,16 @@ import android.widget.ImageView
 import android.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.textview.MaterialTextView
 import dev.cubxity.kraft.R
-import dev.cubxity.kraft.db.entity.Account
+import dev.cubxity.kraft.entity.Server
 import kotlinx.android.synthetic.main.list_item.view.*
+import kotlinx.coroutines.runBlocking
 
-class AccountAdapter(private val ctx: Context, private val handler: ActionHandler) :
-    RecyclerView.Adapter<AccountAdapter.ViewHolder>() {
-    val accounts = mutableListOf<Account>()
+class ServersAdapter(private val ctx: Context, private val handler: ActionHandler) :
+    RecyclerView.Adapter<ServersAdapter.ViewHolder>() {
+    val servers = mutableListOf<Server>()
 
     private val layoutInflater = LayoutInflater.from(ctx)
 
@@ -43,29 +45,39 @@ class AccountAdapter(private val ctx: Context, private val handler: ActionHandle
         return ViewHolder(view)
     }
 
-    override fun getItemCount() = accounts.size
+    override fun getItemCount() = servers.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val account = accounts[position]
+        val server = servers[position]
 
-        Glide.with(ctx.applicationContext)
-            .load("https://crafatar.com/avatars/${account.uuid}?overlay")
-            .placeholder(R.drawable.ic_baseline_account_circle_24)
-            .into(holder.image)
-
-        holder.title.text = account.username
-        holder.description.text = account.uuid
+        val owner = server.owner
+        when {
+            owner != null -> Glide.with(ctx.applicationContext)
+                .load("https://crafatar.com/avatars/$owner?overlay")
+                .placeholder(R.drawable.ic_baseline_dns_24)
+                .into(holder.image)
+            !server.isLazy -> Glide.with(ctx.applicationContext)
+                .load("https://eu.mc-api.net/v3/server/favicon/${server.host}")
+                .placeholder(R.drawable.ic_baseline_dns_24)
+                .into(holder.image)
+            else -> holder.image.setImageDrawable(null)
+        }
+        holder.card.setOnClickListener {
+            handler.openSession(server)
+        }
+        holder.title.text = server.name
+        holder.description.text = server.description
         holder.optionsButton.setOnClickListener {
-            createMenu(account, it)
+            createMenu(server, it)
         }
     }
 
-    private fun createMenu(account: Account, view: View) {
+    private fun createMenu(server: Server, view: View) {
         val popup = PopupMenu(ctx, view)
-        popup.inflate(R.menu.account_menu)
+        popup.inflate(R.menu.server_menu)
         popup.setOnMenuItemClickListener {
             when (it.itemId) {
-                R.id.remove_account -> handler.removeAccount(account)
+                R.id.remove_server -> handler.removeServer(server)
             }
             true
         }
@@ -73,6 +85,7 @@ class AccountAdapter(private val ctx: Context, private val handler: ActionHandle
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val card: MaterialCardView = view.item_card
         val image: ImageView = view.card_image
         val title: MaterialTextView = view.card_title
         val description: MaterialTextView = view.card_description
@@ -80,6 +93,8 @@ class AccountAdapter(private val ctx: Context, private val handler: ActionHandle
     }
 
     interface ActionHandler {
-        fun removeAccount(account: Account)
+        fun openSession(server: Server)
+
+        fun removeServer(server: Server)
     }
 }

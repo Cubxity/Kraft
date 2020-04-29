@@ -20,7 +20,10 @@ package dev.cubxity.kraft.utils
 
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
+import com.github.steveice10.mc.auth.data.GameProfile
 import com.github.steveice10.mc.auth.service.AuthenticationService
+import dev.cubxity.kraft.db.entity.Account
 import dev.cubxity.kraft.db.entity.Session
 import dev.cubxity.kraft.db.entity.SessionWithAccount
 import dev.cubxity.kraft.mc.GameSession
@@ -28,20 +31,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.*
 
-/**
- * @param configure configure [GameSession] before connecting
- */
-suspend fun Context.refreshAndConnect(
-    session: SessionWithAccount,
-    createSession: suspend (SessionWithAccount) -> GameSession,
-    configure: GameSession.() -> Unit = {}
-) {
-    val clientToken = clientToken
-
-    Log.d(null, "Client token: $clientToken")
+suspend fun Context.refresh(account: Account): GameProfile? {
     val service = AuthenticationService("$clientToken")
-    service.username = session.account.username
-    service.accessToken = session.account.accessToken
+    service.username = account.username
+    service.accessToken = account.accessToken
 
     withContext(Dispatchers.IO) {
         try {
@@ -51,16 +44,31 @@ suspend fun Context.refreshAndConnect(
         }
     }
 
-    session.account.accessToken = service.accessToken
-    session.account.username = service.selectedProfile.name
+    account.accessToken = service.accessToken
+    account.username = service.selectedProfile.name
 
     withContext(Dispatchers.IO) {
         try {
-            db.accountsDao().updateAccount(session.account)
+            db.accountsDao().updateAccount(account)
         } catch (e: Exception) {
             Log.e(null, "An error occurred whilst updating account", e)
         }
     }
 
-    createSession(session).apply(configure).connect(service.selectedProfile, clientToken)
+    return service.selectedProfile
+}
+
+/**
+ * @param configure configure [GameSession] before connecting
+ */
+suspend fun Context.refreshAndConnect(
+    session: SessionWithAccount,
+    createSession: suspend (SessionWithAccount) -> GameSession,
+    configure: GameSession.() -> Unit = {}
+) {
+    val profile = refresh(session.account) ?: return
+
+    createSession(session)
+        .apply(configure)
+        .connect(profile, clientToken)
 }

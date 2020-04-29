@@ -23,13 +23,17 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import dev.cubxity.kraft.db.dao.AccountsDao
+import dev.cubxity.kraft.db.dao.ServersDao
 import dev.cubxity.kraft.db.dao.SessionsDao
 import dev.cubxity.kraft.db.entity.Account
+import dev.cubxity.kraft.db.entity.Server
 import dev.cubxity.kraft.db.entity.Session
 
-@Database(entities = [Account::class, Session::class], version = 2)
+@Database(entities = [Account::class, Server::class, Session::class], version = 3)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun accountsDao(): AccountsDao
+
+    abstract fun serversDao(): ServersDao
 
     abstract fun sessionsDao(): SessionsDao
 

@@ -39,4 +39,8 @@
     <string name="remove_account">Remove account</string>
     <string name="remove_session">Remove session</string>
     <string name="chat_hint">Chat</string>
+    <string name="remove_server">Remove server</string>
+    <string name="server_name">Server name</string>
+    <string name="title_servers">Servers</string>
+    <string name="add_server_description">Add server</string>
 </resources>

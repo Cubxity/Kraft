@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~     Kraft: Lightweight Minecraft client for Android featuring modules support and other task automation
   ~     Copyright (C) 2020  Cubxity
   ~
@@ -34,6 +33,12 @@
         android:name="dev.cubxity.kraft.ui.sessions.SessionsFragment"
         android:label="@string/title_sessions"
         tools:layout="@layout/fragment_sessions" />
+
+    <fragment
+        android:id="@+id/navigation_servers"
+        android:name="dev.cubxity.kraft.ui.servers.ServersFragment"
+        android:label="@string/title_servers"
+        tools:layout="@layout/fragment_servers" />
 
     <fragment
         android:id="@+id/navigation_settings"

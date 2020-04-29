@@ -17,25 +17,7 @@
   -->
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-
     <item
-        android:id="@+id/navigation_accounts"
-        android:icon="@drawable/ic_baseline_account_circle_24"
-        android:title="@string/title_accounts" />
-
-    <item
-        android:id="@+id/navigation_sessions"
-        android:icon="@drawable/ic_baseline_dashboard_24"
-        android:title="@string/title_sessions" />
-
-    <item
-        android:id="@+id/navigation_servers"
-        android:icon="@drawable/ic_baseline_dns_24"
-        android:title="@string/title_servers" />
-
-    <item
-        android:id="@+id/navigation_settings"
-        android:icon="@drawable/ic_baseline_settings_24"
-        android:title="@string/title_settings" />
-
+        android:id="@+id/remove_server"
+        android:title="@string/remove_server" />
 </menu>

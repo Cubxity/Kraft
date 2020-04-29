@@ -26,6 +26,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import dev.cubxity.kraft.R
 import dev.cubxity.kraft.db.entity.Account
+import dev.cubxity.kraft.db.entity.Server
 import dev.cubxity.kraft.db.entity.Session
 import dev.cubxity.kraft.db.entity.SessionWithAccount
 import kotlinx.android.synthetic.main.dialog_create_session.*
@@ -113,5 +114,44 @@ object UIUtils {
                 .create()
                 .show()
         }
+    }
+
+    suspend fun addServer(ctx: Activity): Server? = suspendCoroutine { c ->
+        val view = ctx.layoutInflater.inflate(R.layout.dialog_add_server, null)
+
+        AlertDialog.Builder(ctx)
+            .setTitle("Add server")
+            .setView(view)
+            .setMessage("Please enter the server's details below")
+            .setNegativeButton("Cancel") { i, _ -> i.cancel() }
+            .setPositiveButton("Create") { i, _ ->
+                val dialog = i as AlertDialog
+                val name = dialog.name_field.text.toString()
+                val host = dialog.host_field.text.toString()
+                val port = dialog.port_field.text.toString().toInt()
+
+                when {
+                    name.isEmpty() -> {
+                        Toast.makeText(
+                            ctx,
+                            R.string.toast_empty_name,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        c.resume(null)
+                    }
+                    host.isEmpty() -> {
+                        Toast.makeText(
+                            ctx,
+                            R.string.toast_empty_host,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        c.resume(null)
+                    }
+                    else -> c.resume(Server.create(name, host, port))
+                }
+            }
+            .setOnCancelListener { c.resume(null) }
+            .create()
+            .show()
     }
 }
