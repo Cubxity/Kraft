@@ -34,10 +34,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.Serv
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnObjectPacket
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnPlayerPacket
 import com.github.steveice10.packetlib.Client
-import com.github.steveice10.packetlib.event.session.ConnectedEvent
-import com.github.steveice10.packetlib.event.session.DisconnectedEvent
-import com.github.steveice10.packetlib.event.session.PacketReceivedEvent
-import com.github.steveice10.packetlib.event.session.SessionAdapter
+import com.github.steveice10.packetlib.event.session.*
 import com.github.steveice10.packetlib.packet.Packet
 import com.github.steveice10.packetlib.tcp.TcpSessionFactory
 import dev.cubxity.kraft.db.entity.SessionWithAccount
@@ -127,6 +124,10 @@ class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter()
         listeners.forEach { it.onConnect() }
     }
 
+    override fun disconnecting(event: DisconnectingEvent?) {
+        warn("Client", "Disconnecting...")
+    }
+
     override fun disconnected(event: DisconnectedEvent) {
         state = GameSession.State.DISCONNECTED
         warn("Client", "Disconnected: ${event.reason}")
@@ -147,7 +148,7 @@ class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter()
 
     override fun packetReceived(event: PacketReceivedEvent) {
         when (val packet: Packet = event.getPacket()) {
-            is ServerChatPacket -> if (packet.type == MessageType.CHAT) {
+            is ServerChatPacket -> if (packet.type != MessageType.NOTIFICATION) {
                 log(null, ChatUtils.buildSpan(packet.message))
                 listeners.forEach { it.onChat(packet.message) }
             }

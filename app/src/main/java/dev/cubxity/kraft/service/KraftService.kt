@@ -95,7 +95,7 @@ class KraftService : Service(), CoroutineScope, GameSession.Listener {
     override fun onStateChanged(state: GameSession.State) {
         Log.d(TAG, "State changed: $state")
 
-        if (state == GameSession.State.DISCONNECTED && sessions.none { (_, session) -> session.isActive }) {
+        if (sessions.none { (_, session) -> session.isActive }) {
             // If there are no sessions active and the service is currently running in foreground
             if (isForeground) {
                 Log.i(TAG, "Running service as background")
