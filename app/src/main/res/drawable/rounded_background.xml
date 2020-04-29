@@ -1,4 +1,4 @@
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~     Kraft: Lightweight Minecraft client for Android featuring modules support and other task automation
   ~     Copyright (C) 2020  Cubxity
   ~
@@ -16,23 +16,7 @@
   ~     along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 
-<resources>
-    <!-- Base application theme. -->
-    <style name="Theme.App" parent="Theme.MaterialComponents">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:statusBarColor">@android:color/black</item>
-    </style>
-
-    <style name="Theme.App.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-    </style>
-
-    <style name="Theme.App.AppBarOverlay" parent="ThemeOverlay.MaterialComponents" />
-
-    <style name="Theme.App.PopupOverlay" parent="ThemeOverlay.MaterialComponents" />
-
-</resources>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#222" />
+    <corners android:radius="32dp" />
+</shape>

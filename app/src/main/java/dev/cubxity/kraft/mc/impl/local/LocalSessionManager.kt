@@ -43,10 +43,10 @@ class LocalSessionManager(private val ctx: Context) : SessionManager {
     }
 
     override suspend fun getSessions() =
-        binder?.service?.sessions?.values?.toList() ?: error("Service not found")
+        binder?.service?.sessions?.values?.toList() ?: error("Service not bound")
 
     override suspend fun getSession(session: SessionWithAccount) =
-        binder?.service?.sessions?.get(session)
+        binder?.service?.sessions?.get(session.session.id)
 
     override suspend fun createSession(session: SessionWithAccount) =
         binder?.service?.createSession(session) ?: error("Service not bound")

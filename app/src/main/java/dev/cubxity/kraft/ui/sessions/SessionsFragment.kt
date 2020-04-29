@@ -29,7 +29,6 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.cubxity.kraft.R
 import dev.cubxity.kraft.SessionActivity
-import dev.cubxity.kraft.db.entity.Session
 import dev.cubxity.kraft.db.entity.SessionWithAccount
 import dev.cubxity.kraft.ui.SessionAdapter
 import kotlinx.android.synthetic.main.fragment_sessions.*

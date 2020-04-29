@@ -38,4 +38,5 @@
     <string name="toast_no_account">You must select an account</string>
     <string name="remove_account">Remove account</string>
     <string name="remove_session">Remove session</string>
+    <string name="chat_hint">Chat</string>
 </resources>

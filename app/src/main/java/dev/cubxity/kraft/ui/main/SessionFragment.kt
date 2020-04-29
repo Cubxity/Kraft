@@ -26,6 +26,7 @@ import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
@@ -38,9 +39,9 @@ import kotlin.properties.Delegates
 class SessionFragment : Fragment() {
     private val sessionViewModel: SessionViewModel by activityViewModels()
 
-    var successColor by Delegates.notNull<Int>()
-    var warningColor by Delegates.notNull<Int>()
-    var errorColor by Delegates.notNull<Int>()
+    private var successColor by Delegates.notNull<Int>()
+    private var warningColor by Delegates.notNull<Int>()
+    private var errorColor by Delegates.notNull<Int>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -62,6 +63,14 @@ class SessionFragment : Fragment() {
                 value?.also { updateLog(it) }
             }
         })
+
+        chat_input.setOnEditorActionListener { v, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEND) {
+                sessionViewModel.sendChat(v.text.toString())
+                v.text = ""
+                true
+            } else false
+        }
 
         val session: SessionWithAccount? = arguments?.getParcelable("session")
         session?.also { sessionViewModel.fetchGameSession(it) }

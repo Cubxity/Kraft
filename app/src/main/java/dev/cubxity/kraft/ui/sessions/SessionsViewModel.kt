@@ -71,9 +71,12 @@ class SessionsViewModel(app: Application) : AndroidViewModel(app) {
         val app: KraftApplication = getApplication()
 
         app.db.sessionsDao().deleteSession(session.session)
-        app.sessionManager.removeSession(session)
+        try {
+            app.sessionManager.removeSession(session)
+        } catch (e: Exception) {
+            Log.e(TAG, "Unable to remove the session", e)
+        }
 
         sessions.postValue(sessions.value!! - session)
     }
-
 }

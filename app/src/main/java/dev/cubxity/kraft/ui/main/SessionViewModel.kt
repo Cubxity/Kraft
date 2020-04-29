@@ -37,4 +37,8 @@ class SessionViewModel(app: Application) : AndroidViewModel(app), GameSession.Li
         val app: KraftApplication = getApplication()
         gameSession.postValue(app.sessionManager.getSession(session))
     }
+
+    fun sendChat(text: String) = viewModelScope.launch(Dispatchers.IO) {
+        gameSession.value?.sendMessage(text)
+    }
 }

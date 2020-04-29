@@ -55,7 +55,7 @@ class KraftService : Service(), CoroutineScope, GameSession.Listener {
     private val binder = KraftBinder()
     private var isForeground: Boolean = false
 
-    val sessions = HashMap<SessionWithAccount, LocalGameSession>()
+    val sessions = HashMap<Int, LocalGameSession>()
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         launch {
@@ -119,10 +119,10 @@ class KraftService : Service(), CoroutineScope, GameSession.Listener {
     }
 
     suspend fun createSession(session: SessionWithAccount): LocalGameSession =
-        sessions.getOrPut(session) { LocalGameSession(session).apply { addListener(this@KraftService) } }
+        sessions.getOrPut(session.session.id!!) { LocalGameSession(session).apply { addListener(this@KraftService) } }
 
     fun removeSession(session: SessionWithAccount) {
-        val gameSession = sessions.remove(session) ?: return
+        val gameSession = sessions.remove(session.session.id) ?: return
         gameSession.disconnect()
         gameSession.removeListener(this)
     }
