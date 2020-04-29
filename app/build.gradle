@@ -76,7 +76,7 @@ dependencies {
 
     implementation "androidx.room:room-ktx:$room_version"
     implementation "androidx.room:room-runtime:$room_version"
-    implementation 'com.github.Steveice10:MCProtocolLib:1.15-1'
+    implementation 'com.github.Steveice10:MCProtocolLib:5ae680aaeb'
 
     kapt "androidx.room:room-compiler:$room_version"
     kapt 'com.github.bumptech.glide:compiler:4.11.0'
