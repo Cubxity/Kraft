@@ -26,6 +26,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.textview.MaterialTextView
 import dev.cubxity.kraft.R
@@ -49,6 +50,10 @@ class SessionAdapter(private val ctx: Context, private val handler: ActionHandle
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val session = sessions[position]
 
+        Glide.with(ctx.applicationContext)
+            .load("https://eu.mc-api.net/v3/server/favicon/${session.session.serverHost}")
+            .placeholder(R.drawable.ic_baseline_dns_24)
+            .into(holder.image)
         holder.card.setOnClickListener {
             handler.openSession(session)
         }
