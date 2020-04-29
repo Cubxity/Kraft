@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~     Kraft: Lightweight Minecraft client for Android featuring modules support and other task automation
   ~     Copyright (C) 2020  Cubxity
   ~
@@ -25,4 +24,21 @@
     <color name="colorWarning">#FFD180</color>
     <color name="colorError">#FF8A80</color>
     <color name="stroke_color">#333</color>
+
+    <color name="black">#000</color>
+    <color name="darkBlue">#536DFE</color>
+    <color name="darkGreen">#69F0AE</color>
+    <color name="darkAqua">#18FFFF</color>
+    <color name="darkRed">#FF5252</color>
+    <color name="darkPurple">#7C4DFF</color>
+    <color name="gold">#FFD740</color>
+    <color name="gray">#eee</color>
+    <color name="darkGray">#333</color>
+    <color name="blue">#80D8FF</color>
+    <color name="green">#CCFF90</color>
+    <color name="aqua">#84FFFF</color>
+    <color name="red">#FF8A80</color>
+    <color name="lightPurple">#B388FF</color>
+    <color name="yellow">#F4FF81</color>
+    <color name="white">#fff</color>
 </resources>

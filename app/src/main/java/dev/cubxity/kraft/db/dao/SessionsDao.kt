@@ -35,7 +35,7 @@ interface SessionsDao {
     suspend fun updateSession(session: Session)
 
     @Insert
-    suspend fun addSession(session: Session)
+    suspend fun addSession(session: Session): Long
 
     @Delete
     suspend fun deleteSession(session: Session)

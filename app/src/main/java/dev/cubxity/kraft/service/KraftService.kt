@@ -115,7 +115,7 @@ class KraftService : Service(), CoroutineScope, GameSession.Listener {
     }
 
     override fun onChat(message: Message) {
-        println(message.fullText)
+
     }
 
     suspend fun createSession(session: SessionWithAccount): LocalGameSession =

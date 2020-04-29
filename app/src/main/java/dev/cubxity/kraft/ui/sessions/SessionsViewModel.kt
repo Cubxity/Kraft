@@ -52,7 +52,8 @@ class SessionsViewModel(app: Application) : AndroidViewModel(app) {
         val session = withContext(Dispatchers.Main) { UIUtils.createSession(ctx) } ?: return@launch
         val app: KraftApplication = getApplication()
 
-        withContext(Dispatchers.IO) { app.db.sessionsDao().addSession(session.session) }
+        session.session.id =
+            withContext(Dispatchers.IO) { app.db.sessionsDao().addSession(session.session) }.toInt()
 
         sessions.postValue(sessions.value!! + session)
 

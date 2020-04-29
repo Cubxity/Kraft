@@ -20,13 +20,13 @@ package dev.cubxity.kraft.ui.main
 
 import android.graphics.Typeface
 import android.os.Bundle
-import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import androidx.core.text.buildSpannedString
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
@@ -85,25 +85,23 @@ class SessionFragment : Fragment() {
     }
 
     private fun updateLog(log: List<GameSession.LogEntry>) {
-        val text = log.joinToString("\n") { "[${it.scope}] ${it.content}" }
-        val spannable = SpannableString(text)
-
-        var i = 0
-        for (entry in log) {
-            val scopeLength = entry.scope.length
-            val contentLength = entry.content.length
-            val length = scopeLength + contentLength + 3
-            if (entry.level != GameSession.LogLevel.INFO) {
-                val color = when (entry.level) {
-                    GameSession.LogLevel.SUCCESS -> successColor
-                    GameSession.LogLevel.WARNING -> warningColor
-                    GameSession.LogLevel.ERROR -> errorColor
-                    else -> errorColor
+        val spannable = buildSpannedString {
+            for (entry in log) {
+                append("[${entry.scope}]", StyleSpan(Typeface.BOLD), 0)
+                append(' ')
+                if (entry.level != GameSession.LogLevel.INFO) {
+                    val color = when (entry.level) {
+                        GameSession.LogLevel.SUCCESS -> successColor
+                        GameSession.LogLevel.WARNING -> warningColor
+                        GameSession.LogLevel.ERROR -> errorColor
+                        else -> errorColor
+                    }
+                    append(entry.content, ForegroundColorSpan(color), 0)
+                } else {
+                    append(entry.content)
                 }
-                spannable.setSpan(ForegroundColorSpan(color), i, i + length, 0)
+                append('\n')
             }
-            spannable.setSpan(StyleSpan(Typeface.BOLD), i, i + scopeLength + 2, 0)
-            i += (length + 1) // Length + line separator
         }
 
         logs.text = spannable

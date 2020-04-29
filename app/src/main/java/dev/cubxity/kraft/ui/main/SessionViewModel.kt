@@ -21,9 +21,7 @@ package dev.cubxity.kraft.ui.main
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.steveice10.mc.protocol.data.message.Message
 import dev.cubxity.kraft.KraftApplication
 import dev.cubxity.kraft.db.entity.SessionWithAccount
 import dev.cubxity.kraft.mc.GameSession

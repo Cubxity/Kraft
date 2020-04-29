@@ -46,6 +46,7 @@ import dev.cubxity.kraft.mc.entitiy.Entity
 import dev.cubxity.kraft.mc.entitiy.SelfPlayer
 import dev.cubxity.kraft.mc.impl.entity.BaseEntity
 import dev.cubxity.kraft.mc.impl.entity.SelfPlayerImpl
+import dev.cubxity.kraft.utils.ChatUtils
 import kotlinx.coroutines.*
 import java.lang.Exception
 import java.util.*
@@ -147,7 +148,7 @@ class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter()
     override fun packetReceived(event: PacketReceivedEvent) {
         when (val packet: Packet = event.getPacket()) {
             is ServerChatPacket -> if (packet.type == MessageType.CHAT) {
-                log("Chat", packet.message.fullText)
+                log("Chat", ChatUtils.buildSpan(packet.message))
                 listeners.forEach { it.onChat(packet.message) }
             }
             is ServerJoinGamePacket -> {
@@ -218,7 +219,7 @@ class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter()
 
     private fun log(
         scope: String,
-        content: String,
+        content: CharSequence,
         level: GameSession.LogLevel = GameSession.LogLevel.INFO
     ) {
         val log = log.value ?: emptyList()
@@ -227,12 +228,14 @@ class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter()
         this.log.postValue(new)
     }
 
-    private fun warn(scope: String, content: String) =
+    private fun warn(scope: String, content: CharSequence) =
         log(scope, content, GameSession.LogLevel.WARNING)
 
-    private fun error(scope: String, content: String) =
+    private fun error(scope: String, content: CharSequence) =
         log(scope, content, GameSession.LogLevel.ERROR)
 
-    private fun success(scope: String, content: String) =
-        log(scope, content, GameSession.LogLevel.SUCCESS)
+    private fun success(
+        scope: String,
+        content: CharSequence
+    ) = log(scope, content, GameSession.LogLevel.SUCCESS)
 }

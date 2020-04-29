@@ -32,7 +32,7 @@ import kotlinx.android.parcel.Parcelize
     )]
 )
 data class Session(
-    @PrimaryKey(autoGenerate = true) val id: Int?,
+    @PrimaryKey(autoGenerate = true) var id: Int?,
     @ColumnInfo(name = "name") var name: String,
     @ColumnInfo(name = "account_uuid") val accountUUID: String,
     @ColumnInfo(name = "server_host") var serverHost: String,

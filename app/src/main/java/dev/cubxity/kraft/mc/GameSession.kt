@@ -74,7 +74,11 @@ interface GameSession {
         fun onEntityDestroy(entity: Entity) {}
     }
 
-    data class LogEntry(val scope: String, val content: String, val level: LogLevel = LogLevel.INFO)
+    data class LogEntry(
+        val scope: String,
+        val content: CharSequence,
+        val level: LogLevel = LogLevel.INFO
+    )
 
     enum class LogLevel {
         ERROR,
