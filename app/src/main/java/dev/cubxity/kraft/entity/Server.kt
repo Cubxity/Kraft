@@ -46,15 +46,22 @@ interface Server {
         get() = null
 
     /**
+     * Account associated with this server (Realm)
+     */
+    val account: UUID?
+        get() = null
+
+    /**
      * @return if getAddress is lazy (F.ex realm)
      */
     val isLazy: Boolean
 
-    suspend fun getAddress(account: Account): Pair<String, Int>? {
+    suspend fun getAddress(account: Account): Pair<String, Int> {
         val host = host
         val port = port
         return if (host != null && port != null)
-            return host to port
-        else null
+            host to port
+        else
+            error("No address specified")
     }
 }

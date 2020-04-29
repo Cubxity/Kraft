@@ -20,6 +20,7 @@
             android:id="@+id/name_field"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:imeOptions="actionNext"
             android:maxLines="1" />
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -39,6 +40,7 @@
             android:id="@+id/host_field"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:imeOptions="actionNext"
             android:maxLines="1" />
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -57,6 +59,7 @@
             android:id="@+id/port_field"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:imeOptions="actionNext"
             android:inputType="number"
             android:maxLength="5"
             android:maxLines="1"
@@ -76,6 +79,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/account"
+            android:imeOptions="actionDone"
             android:inputType="none"
             android:maxLines="1" />
 

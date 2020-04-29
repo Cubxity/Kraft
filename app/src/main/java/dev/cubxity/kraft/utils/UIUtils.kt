@@ -154,4 +154,41 @@ object UIUtils {
             .create()
             .show()
     }
+
+    suspend fun selectAccount(ctx: Activity): Account? {
+        val accounts = withContext(Dispatchers.IO) { ctx.db.accountsDao().getAccounts() }
+
+        return suspendCoroutine { c ->
+            val view = ctx.layoutInflater.inflate(R.layout.dialog_choose_account, null)
+            val adapter = ArrayAdapter(ctx, R.layout.autocomplete_item, accounts)
+            var selectedAccount: Account? = null
+
+            val autocomplete: AutoCompleteTextView? = view.account_autocomplete
+            autocomplete?.setAdapter(adapter)
+            autocomplete?.setOnItemClickListener { _, _, i, _ ->
+                selectedAccount = adapter.getItem(i)
+            }
+
+            AlertDialog.Builder(ctx)
+                .setTitle("Select account")
+                .setView(view)
+                .setMessage("Please select an account")
+                .setNegativeButton("Cancel") { i, _ -> i.cancel() }
+                .setPositiveButton("Select") { _, _ ->
+                    val account = selectedAccount
+
+                    if (account == null) {
+                        Toast.makeText(
+                            ctx,
+                            R.string.toast_no_account,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        c.resume(null)
+                    } else c.resume(selectedAccount)
+                }
+                .setOnCancelListener { c.resume(null) }
+                .create()
+                .show()
+        }
+    }
 }

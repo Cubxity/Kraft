@@ -20,9 +20,15 @@ package dev.cubxity.kraft.entity
 
 import com.google.gson.annotations.SerializedName
 import dev.cubxity.kraft.db.entity.Account
+import dev.cubxity.kraft.utils.buildRealmCookie
+import dev.cubxity.kraft.utils.client
+import io.ktor.client.request.get
+import io.ktor.client.request.header
 import java.util.*
 
 data class WorldsResponse(val servers: List<Realm>)
+
+data class JoinResponse(val address: String, val pendingUpdate: Boolean)
 
 data class Realm(
     val id: Int,
@@ -44,5 +50,14 @@ data class Realm(
     override val description: String
         get() = motd
 
-    override suspend fun getAddress(account: Account): Pair<String, Int>? = null
+    override var account: UUID? = null
+
+    override suspend fun getAddress(account: Account): Pair<String, Int> {
+        val res: JoinResponse =
+            client.get("https://pc.realms.minecraft.net/worlds/v1/$id/join/pc") {
+                header("Cookie", buildRealmCookie(account))
+            }
+        val split = res.address.split(':')
+        return split[0] to split[1].toInt()
+    }
 }

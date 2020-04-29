@@ -16,26 +16,24 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package dev.cubxity.kraft.db.dao
+package dev.cubxity.kraft.utils
 
-import androidx.room.*
+import com.github.steveice10.mc.auth.util.UUIDSerializer
 import dev.cubxity.kraft.db.entity.Account
-import dev.cubxity.kraft.entity.Server
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.features.json.GsonSerializer
+import io.ktor.client.features.json.JsonFeature
+import java.util.*
 
-@Dao
-interface AccountsDao {
-    @Query("SELECT * FROM accounts")
-    suspend fun getAccounts(): List<Account>
-
-    @Update
-    suspend fun updateAccount(account: Account)
-
-    @Insert
-    suspend fun addAccount(account: Account)
-
-    @Delete
-    suspend fun deleteAccount(account: Account)
-
-    @Query("SELECT * FROM accounts WHERE uuid=:uuid")
-    suspend fun  getAccount(uuid: String): Account?
+val client = HttpClient(OkHttp) {
+    install(JsonFeature) {
+        serializer = GsonSerializer {
+            registerTypeAdapter(UUID::class.java, UUIDSerializer())
+        }
+    }
 }
+
+fun buildRealmCookie(account: Account) =
+    "sid=token:${account.accessToken}:${account.uuid.replace("-", "")}" +
+            ";user=${account.username};version=1.15.2"

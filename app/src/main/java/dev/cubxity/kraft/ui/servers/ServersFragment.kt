@@ -68,6 +68,6 @@ class ServersFragment : Fragment(), ServersAdapter.ActionHandler {
     }
 
     override fun openSession(server: Server) {
-        // TODO
+        serversViewModel.openSession(requireActivity(), server)
     }
 }
