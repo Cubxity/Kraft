@@ -19,6 +19,7 @@
 package dev.cubxity.kraft.mc.impl.local
 
 import android.util.Log
+import androidx.lifecycle.MutableLiveData
 import com.github.steveice10.mc.auth.data.GameProfile
 import com.github.steveice10.mc.protocol.MinecraftProtocol
 import com.github.steveice10.mc.protocol.data.game.MessageType
@@ -39,7 +40,6 @@ import com.github.steveice10.packetlib.event.session.PacketReceivedEvent
 import com.github.steveice10.packetlib.event.session.SessionAdapter
 import com.github.steveice10.packetlib.packet.Packet
 import com.github.steveice10.packetlib.tcp.TcpSessionFactory
-import dev.cubxity.kraft.db.entity.Session
 import dev.cubxity.kraft.db.entity.SessionWithAccount
 import dev.cubxity.kraft.mc.GameSession
 import dev.cubxity.kraft.mc.entitiy.Entity
@@ -51,7 +51,8 @@ import java.lang.Exception
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 
-class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter(), GameSession, CoroutineScope {
+class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter(), GameSession,
+    CoroutineScope {
     companion object {
         private const val TAG = "LocalGameSession"
     }
@@ -65,6 +66,8 @@ class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter()
             listeners.forEach { it.onStateChanged(value) }
             field = value
         }
+
+    override val log: MutableLiveData<List<GameSession.LogEntry>> = MutableLiveData(emptyList())
 
     private var entityId: Int? = null
     override var player: SelfPlayer? = null
@@ -81,7 +84,8 @@ class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter()
         val account = info.account
         val protocol = MinecraftProtocol(profile, "$clientToken", account.accessToken)
 
-        val client = Client(info.session.serverHost, info.session.serverPort, protocol, TcpSessionFactory())
+        val client =
+            Client(info.session.serverHost, info.session.serverPort, protocol, TcpSessionFactory())
         client.session.addListener(this)
         client.session.connect()
 
@@ -118,11 +122,13 @@ class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter()
 
     override fun connected(event: ConnectedEvent) {
         state = GameSession.State.CONNECTED
+        success("Client", "Connected to ${event.session.remoteAddress}")
         listeners.forEach { it.onConnect() }
     }
 
     override fun disconnected(event: DisconnectedEvent) {
         state = GameSession.State.DISCONNECTED
+        warn("Client", "Disconnected: ${event.reason}")
         listeners.forEach { it.onDisconnect(event.reason) }
     }
 
@@ -140,8 +146,10 @@ class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter()
 
     override fun packetReceived(event: PacketReceivedEvent) {
         when (val packet: Packet = event.getPacket()) {
-            is ServerChatPacket -> if (packet.type == MessageType.CHAT)
+            is ServerChatPacket -> if (packet.type == MessageType.CHAT) {
+                log("Chat", packet.message.fullText)
                 listeners.forEach { it.onChat(packet.message) }
+            }
             is ServerJoinGamePacket -> {
                 entityId = packet.entityId
             }
@@ -207,4 +215,24 @@ class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter()
             }
         }
     }
+
+    private fun log(
+        scope: String,
+        content: String,
+        level: GameSession.LogLevel = GameSession.LogLevel.INFO
+    ) {
+        val log = log.value ?: emptyList()
+        val new = log.let { if (it.size > 100) it.drop(1) else it } +
+                GameSession.LogEntry(scope, content, level)
+        this.log.postValue(new)
+    }
+
+    private fun warn(scope: String, content: String) =
+        log(scope, content, GameSession.LogLevel.WARNING)
+
+    private fun error(scope: String, content: String) =
+        log(scope, content, GameSession.LogLevel.ERROR)
+
+    private fun success(scope: String, content: String) =
+        log(scope, content, GameSession.LogLevel.SUCCESS)
 }

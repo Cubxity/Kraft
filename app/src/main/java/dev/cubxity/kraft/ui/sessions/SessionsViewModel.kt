@@ -22,6 +22,7 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -34,6 +35,7 @@ import dev.cubxity.kraft.utils.refreshAndConnect
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.lang.Exception
 
 class SessionsViewModel(app: Application) : AndroidViewModel(app) {
     companion object {
@@ -54,11 +56,15 @@ class SessionsViewModel(app: Application) : AndroidViewModel(app) {
 
         sessions.postValue(sessions.value!! + session)
 
-        ctx.refreshAndConnect(session, app.sessionManager::createSession)
+        try {
+            ctx.refreshAndConnect(session, app.sessionManager::createSession)
 
-        val intent = Intent(ctx, SessionActivity::class.java)
-        intent.putExtra("session", session)
-        ctx.startActivity(intent)
+            val intent = Intent(ctx, SessionActivity::class.java)
+            intent.putExtra("session", session)
+            ctx.startActivity(intent)
+        } catch (e: Exception) {
+            Log.e(TAG, "Unable to start the session", e)
+        }
     }
 
     fun removeSession(session: SessionWithAccount) = viewModelScope.launch(Dispatchers.IO) {

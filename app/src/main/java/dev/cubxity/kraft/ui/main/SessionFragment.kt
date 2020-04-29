@@ -18,7 +18,11 @@
 
 package dev.cubxity.kraft.ui.main
 
+import android.graphics.Typeface
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
+import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,10 +31,16 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import dev.cubxity.kraft.R
 import dev.cubxity.kraft.db.entity.SessionWithAccount
+import dev.cubxity.kraft.mc.GameSession
 import kotlinx.android.synthetic.main.fragment_session.*
+import kotlin.properties.Delegates
 
 class SessionFragment : Fragment() {
     private val sessionViewModel: SessionViewModel by activityViewModels()
+
+    var successColor by Delegates.notNull<Int>()
+    var warningColor by Delegates.notNull<Int>()
+    var errorColor by Delegates.notNull<Int>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -38,11 +48,19 @@ class SessionFragment : Fragment() {
     ): View? = inflater.inflate(R.layout.fragment_session, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        sessionViewModel.log.observe(viewLifecycleOwner, Observer {
-            logs.text = it
-        })
-        sessionViewModel.gameSession.observe(viewLifecycleOwner, Observer {
-            it?.addListener(sessionViewModel)
+        val ctx = requireContext()
+        successColor = ctx.getColor(R.color.colorSuccess)
+        warningColor = ctx.getColor(R.color.colorWarning)
+        errorColor = ctx.getColor(R.color.colorError)
+
+        sessionViewModel.gameSession.observe(viewLifecycleOwner, Observer { session ->
+            session?.addListener(sessionViewModel)
+            session?.log?.apply {
+                observe(viewLifecycleOwner, Observer { log ->
+                    updateLog(log)
+                })
+                value?.also { updateLog(it) }
+            }
         })
 
         val session: SessionWithAccount? = arguments?.getParcelable("session")
@@ -55,6 +73,31 @@ class SessionFragment : Fragment() {
             value?.removeListener(sessionViewModel)
             value = null
         }
+    }
+
+    private fun updateLog(log: List<GameSession.LogEntry>) {
+        val text = log.joinToString("\n") { "[${it.scope}] ${it.content}" }
+        val spannable = SpannableString(text)
+
+        var i = 0
+        for (entry in log) {
+            val scopeLength = entry.scope.length
+            val contentLength = entry.content.length
+            val length = scopeLength + contentLength + 3
+            if (entry.level != GameSession.LogLevel.INFO) {
+                val color = when (entry.level) {
+                    GameSession.LogLevel.SUCCESS -> successColor
+                    GameSession.LogLevel.WARNING -> warningColor
+                    GameSession.LogLevel.ERROR -> errorColor
+                    else -> errorColor
+                }
+                spannable.setSpan(ForegroundColorSpan(color), i, i + length, 0)
+            }
+            spannable.setSpan(StyleSpan(Typeface.BOLD), i, i + scopeLength + 2, 0)
+            i += (length + 1) // Length + line separator
+        }
+
+        logs.text = spannable
     }
 
     companion object {

@@ -21,5 +21,8 @@
     <color name="colorPrimary">#4CAF50</color>
     <color name="colorPrimaryDark">#388E3C</color>
     <color name="colorAccent">#A5D6A7</color>
+    <color name="colorSuccess">#A5D6A7</color>
+    <color name="colorWarning">#FFD180</color>
+    <color name="colorError">#FF8A80</color>
     <color name="stroke_color">#333</color>
 </resources>

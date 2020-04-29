@@ -18,9 +18,9 @@
 
 package dev.cubxity.kraft.mc
 
+import androidx.lifecycle.LiveData
 import com.github.steveice10.mc.auth.data.GameProfile
 import com.github.steveice10.mc.protocol.data.message.Message
-import dev.cubxity.kraft.db.entity.Session
 import dev.cubxity.kraft.db.entity.SessionWithAccount
 import dev.cubxity.kraft.mc.entitiy.Entity
 import dev.cubxity.kraft.mc.entitiy.SelfPlayer
@@ -30,6 +30,8 @@ interface GameSession {
     val info: SessionWithAccount
 
     val state: State
+
+    val log: LiveData<List<LogEntry>>
 
     val player: SelfPlayer?
 
@@ -70,5 +72,14 @@ interface GameSession {
         fun onEntityUpdate(entity: Entity) {}
 
         fun onEntityDestroy(entity: Entity) {}
+    }
+
+    data class LogEntry(val scope: String, val content: String, val level: LogLevel = LogLevel.INFO)
+
+    enum class LogLevel {
+        ERROR,
+        WARNING,
+        INFO,
+        SUCCESS,
     }
 }

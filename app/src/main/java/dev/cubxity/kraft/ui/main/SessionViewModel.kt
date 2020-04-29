@@ -32,14 +32,9 @@ import kotlinx.coroutines.launch
 
 class SessionViewModel(app: Application) : AndroidViewModel(app), GameSession.Listener {
     val gameSession = MutableLiveData<GameSession>()
-    val log = MutableLiveData("")
 
     fun fetchGameSession(session: SessionWithAccount) = viewModelScope.launch(Dispatchers.IO) {
         val app: KraftApplication = getApplication()
         gameSession.postValue(app.sessionManager.getSession(session))
-    }
-
-    override fun onChat(message: Message) {
-        log.postValue(log.value + "\n" + message.fullText)
     }
 }
