@@ -16,7 +16,7 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package dev.cubxity.kraft.ui.main
+package dev.cubxity.kraft.ui.session
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel

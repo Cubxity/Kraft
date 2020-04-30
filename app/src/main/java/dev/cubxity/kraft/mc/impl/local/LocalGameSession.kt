@@ -23,12 +23,15 @@ import androidx.lifecycle.MutableLiveData
 import com.github.steveice10.mc.auth.data.GameProfile
 import com.github.steveice10.mc.protocol.MinecraftProtocol
 import com.github.steveice10.mc.protocol.data.game.MessageType
+import com.github.steveice10.mc.protocol.data.game.entity.type.`object`.ObjectType
 import com.github.steveice10.mc.protocol.packet.ingame.client.ClientChatPacket
 import com.github.steveice10.mc.protocol.packet.ingame.client.player.ClientPlayerPositionRotationPacket
+import com.github.steveice10.mc.protocol.packet.ingame.client.world.ClientTeleportConfirmPacket
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerChatPacket
 import com.github.steveice10.mc.protocol.packet.ingame.server.ServerJoinGamePacket
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.ServerEntityDestroyPacket
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.ServerEntityMetadataPacket
+import com.github.steveice10.mc.protocol.packet.ingame.server.entity.ServerEntityVelocityPacket
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerHealthPacket
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnObjectPacket
@@ -39,10 +42,11 @@ import com.github.steveice10.packetlib.packet.Packet
 import com.github.steveice10.packetlib.tcp.TcpSessionFactory
 import dev.cubxity.kraft.db.entity.SessionWithAccount
 import dev.cubxity.kraft.mc.GameSession
+import dev.cubxity.kraft.mc.Module
 import dev.cubxity.kraft.mc.entitiy.Entity
 import dev.cubxity.kraft.mc.entitiy.SelfPlayer
-import dev.cubxity.kraft.mc.impl.entity.BaseEntity
-import dev.cubxity.kraft.mc.impl.entity.SelfPlayerImpl
+import dev.cubxity.kraft.mc.impl.entity.*
+import dev.cubxity.kraft.mc.impl.local.modules.AutoFishModule
 import dev.cubxity.kraft.utils.ChatUtils
 import kotlinx.coroutines.*
 import java.lang.Exception
@@ -56,7 +60,8 @@ class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter()
     }
 
     override val coroutineContext = Dispatchers.Default + Job()
-    private var client: Client? = null
+    var client: Client? = null
+        private set
     private var job: Job? = null
 
     override var state: GameSession.State = GameSession.State.DISCONNECTED
@@ -70,6 +75,7 @@ class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter()
     private var entityId: Int? = null
     override var player: SelfPlayer? = null
     override val entities = mutableMapOf<Int, Entity>()
+    override val modules = mutableMapOf<String, Module>()
     override val isActive: Boolean
         get() = state != GameSession.State.DISCONNECTED || client?.session?.isConnected == true
 
@@ -86,6 +92,7 @@ class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter()
             Client(info.session.serverHost, info.session.serverPort, protocol, TcpSessionFactory())
         client.session.addListener(this)
         client.session.connect()
+        registerModules()
 
         job = launch {
             try {
@@ -115,6 +122,7 @@ class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter()
             job?.cancel()
             job = null
             entities.clear()
+            unregisterModules()
         }
     }
 
@@ -154,6 +162,7 @@ class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter()
             }
             is ServerJoinGamePacket -> {
                 entityId = packet.entityId
+                player = SelfPlayerImpl(packet.entityId, UUID.fromString(info.account.uuid))
             }
             is ServerPlayerHealthPacket -> {
                 player?.apply {
@@ -173,9 +182,17 @@ class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter()
                         packet.pitch
                     )
                 )
+                client?.session?.send(ClientTeleportConfirmPacket(packet.teleportId))
+                player?.apply {
+                    x = packet.x
+                    y = packet.y
+                    z = packet.z
+                    yaw = packet.yaw
+                    pitch = packet.pitch
+                }
             }
             is ServerSpawnPlayerPacket -> {
-                val player = SelfPlayerImpl(packet.entityId, packet.uuid)
+                val player = PlayerImpl(packet.entityId, packet.uuid)
                 player.x = packet.x
                 player.y = packet.y
                 player.z = packet.z
@@ -183,10 +200,11 @@ class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter()
                 player.yaw = packet.yaw
 
                 entities[packet.entityId] = player
-                if (packet.entityId == entityId) this.player = player
             }
             is ServerSpawnObjectPacket -> {
                 val entity = when (packet.type) {
+                    ObjectType.ITEM -> Item(packet.entityId, packet.uuid)
+                    ObjectType.FISHING_BOBBER -> FishBobber(packet.entityId, packet.uuid)
                     else -> BaseEntity(packet.entityId, packet.uuid)
                 }
                 entity.data = packet.data
@@ -215,7 +233,36 @@ class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter()
                 entity.metadata = packet.metadata
                 listeners.forEach { it.onEntityUpdate(entity) }
             }
+            is ServerEntityVelocityPacket -> {
+                val entity = entities[packet.entityId] ?: return
+                listeners.forEach {
+                    it.onEntityVelocity(
+                        entity,
+                        packet.motionX,
+                        packet.motionY,
+                        packet.motionZ
+                    )
+                }
+            }
         }
+    }
+
+    private fun registerModules() {
+        register(AutoFishModule(this))
+    }
+
+    private fun register(module: Module) {
+        modules[module.id] = module
+        if (module is GameSession.Listener)
+            addListener(module)
+    }
+
+    private fun unregisterModules() {
+        modules.forEach { (_, module) ->
+            if (module is GameSession.Listener)
+                removeListener(module)
+        }
+        modules.clear()
     }
 
     private fun log(

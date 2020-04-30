@@ -37,6 +37,8 @@ interface GameSession {
 
     val entities: Map<Int, Entity>
 
+    val modules: Map<String, Module>
+
     val isActive: Boolean
 
     fun connect(profile: GameProfile, clientToken: UUID)
@@ -67,11 +69,24 @@ interface GameSession {
 
         fun onChat(message: Message) {}
 
+        fun onEntityVelocity(
+            entity: Entity,
+            velocityX: Double,
+            velocityY: Double,
+            velocityZ: Double
+        ) {
+        }
+
         fun onEntitySpawn(entity: Entity) {}
 
         fun onEntityUpdate(entity: Entity) {}
 
         fun onEntityDestroy(entity: Entity) {}
+
+        /**
+         * Called when a module is added or updated
+         */
+        fun onModuleUpdate(module: Module) {}
     }
 
     data class LogEntry(

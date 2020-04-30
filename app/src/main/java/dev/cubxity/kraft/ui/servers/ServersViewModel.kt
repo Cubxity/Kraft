@@ -51,8 +51,8 @@ class ServersViewModel(app: Application) : AndroidViewModel(app) {
         servers.postValue(ctx.db.serversDao().getServers())
 
         ctx.db.accountsDao().getAccounts().forEach { account ->
-            ctx.refresh(account)
             try {
+                ctx.refresh(account)
                 val res: WorldsResponse = client.get("https://pc.realms.minecraft.net/worlds") {
                     header("Cookie", buildRealmCookie(account))
                 }

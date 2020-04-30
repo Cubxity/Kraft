@@ -16,7 +16,7 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package dev.cubxity.kraft.ui.main
+package dev.cubxity.kraft.ui.session
 
 import android.graphics.Typeface
 import android.os.Bundle
@@ -54,14 +54,9 @@ class SessionFragment : Fragment() {
         warningColor = ctx.getColor(R.color.colorWarning)
         errorColor = ctx.getColor(R.color.colorError)
 
-        sessionViewModel.gameSession.observe(viewLifecycleOwner, Observer { session ->
-            session?.addListener(sessionViewModel)
-            session?.log?.apply {
-                observe(viewLifecycleOwner, Observer { log ->
-                    updateLog(log)
-                })
-                value?.also { updateLog(it) }
-            }
+        installSession(sessionViewModel.gameSession.value)
+        sessionViewModel.gameSession.observe(viewLifecycleOwner, Observer {
+            installSession(it)
         })
 
         chat_input.setOnEditorActionListener { v, actionId, _ ->
@@ -71,16 +66,15 @@ class SessionFragment : Fragment() {
                 true
             } else false
         }
-
-        val session: SessionWithAccount? = arguments?.getParcelable("session")
-        session?.also { sessionViewModel.fetchGameSession(it) }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        sessionViewModel.gameSession.apply {
-            value?.removeListener(sessionViewModel)
-            value = null
+    private fun installSession(session: GameSession?) {
+        session?.addListener(sessionViewModel)
+        session?.log?.apply {
+            observe(viewLifecycleOwner, Observer { log ->
+                updateLog(log)
+            })
+            value?.also { updateLog(it) }
         }
     }
 
@@ -107,16 +101,5 @@ class SessionFragment : Fragment() {
         }
 
         logs.text = spannable
-    }
-
-    companion object {
-        private const val ARG_SESSION = "session"
-
-        @JvmStatic
-        fun newInstance(session: SessionWithAccount) = SessionFragment().apply {
-            arguments = Bundle().apply {
-                putParcelable(ARG_SESSION, session)
-            }
-        }
     }
 }

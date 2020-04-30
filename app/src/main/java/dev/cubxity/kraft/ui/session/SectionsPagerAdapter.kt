@@ -16,37 +16,31 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package dev.cubxity.kraft.ui.main
+package dev.cubxity.kraft.ui.session
 
 import android.content.Context
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import dev.cubxity.kraft.R
-import dev.cubxity.kraft.db.entity.SessionWithAccount
-
-private val TAB_TITLES = arrayOf(
-    R.string.tab_chat
-)
 
 /**
  * A [FragmentPagerAdapter] that returns a fragment corresponding to
  * one of the sections/tabs/pages.
  */
 class SectionsPagerAdapter(
-    private val context: Context,
-    private val session: SessionWithAccount,
+    context: Context,
     fm: FragmentManager
-) :
-    FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
+) : FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
+    val baseTabs = arrayOf(
+        context.getString(R.string.tab_chat) to ::SessionFragment
+    )
 
-    override fun getItem(position: Int) = when (position) {
-        0 -> SessionFragment.newInstance(session)
-        else -> error("Invalid position $position")
-    }
+    var tabs = mutableListOf<Pair<String, () -> Fragment>>(*baseTabs)
 
-    override fun getPageTitle(position: Int) =
-        context.resources.getString(TAB_TITLES[position])
+    override fun getItem(position: Int) = tabs[position].second()
 
-    override fun getCount() = 1
+    override fun getPageTitle(position: Int) = tabs[position].first
+
+    override fun getCount() = tabs.size
 }

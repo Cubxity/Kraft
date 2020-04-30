@@ -19,12 +19,19 @@
 package dev.cubxity.kraft
 
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 import dev.cubxity.kraft.db.entity.SessionWithAccount
-import dev.cubxity.kraft.ui.main.SectionsPagerAdapter
+import dev.cubxity.kraft.mc.GameSession
+import dev.cubxity.kraft.ui.session.ModuleFragment
+import dev.cubxity.kraft.ui.session.SectionsPagerAdapter
+import dev.cubxity.kraft.ui.session.SessionViewModel
 import kotlinx.android.synthetic.main.activity_session.*
 
-class SessionActivity : AppCompatActivity() {
+class SessionActivity : AppCompatActivity(), GameSession.Listener {
+    private val sessionViewModel: SessionViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -36,12 +43,37 @@ class SessionActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_session)
 
-        val sectionsPagerAdapter = SectionsPagerAdapter(this, session, supportFragmentManager)
+        val pagerAdapter = SectionsPagerAdapter(this, supportFragmentManager)
 
         val viewPager = view_pager
-        viewPager.adapter = sectionsPagerAdapter
+        viewPager.adapter = pagerAdapter
 
         val tabs = tabs
         tabs.setupWithViewPager(viewPager)
+
+        sessionViewModel.gameSession.observe(this, Observer {
+            it?.addListener(this)
+            updateModules(pagerAdapter, it)
+        })
+        session.also { sessionViewModel.fetchGameSession(it) }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        sessionViewModel.gameSession.apply {
+            value?.removeListener(this@SessionActivity)
+            value = null
+        }
+    }
+
+    private fun updateModules(pagerAdapter: SectionsPagerAdapter, session: GameSession?) {
+        if (session == null) return
+
+        pagerAdapter.tabs = pagerAdapter.baseTabs.toMutableList()
+        val moduleTabs = session.modules.map { (name, module) ->
+            name to { ModuleFragment.createInstance(module) }
+        }
+        pagerAdapter.tabs.addAll(moduleTabs)
+        pagerAdapter.notifyDataSetChanged()
     }
 }
