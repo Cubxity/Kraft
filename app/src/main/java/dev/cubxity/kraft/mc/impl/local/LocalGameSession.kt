@@ -19,6 +19,7 @@
 package dev.cubxity.kraft.mc.impl.local
 
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import androidx.lifecycle.MutableLiveData
 import com.github.steveice10.mc.auth.data.GameProfile
 import com.github.steveice10.mc.protocol.MinecraftProtocol
@@ -48,6 +49,7 @@ import dev.cubxity.kraft.mc.entitiy.Entity
 import dev.cubxity.kraft.mc.entitiy.SelfPlayer
 import dev.cubxity.kraft.mc.impl.entity.*
 import dev.cubxity.kraft.mc.impl.local.modules.AutoFishModule
+import dev.cubxity.kraft.mc.impl.local.modules.SafetyModule
 import dev.cubxity.kraft.utils.ChatUtils
 import kotlinx.coroutines.*
 import java.lang.Exception
@@ -139,6 +141,7 @@ class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter()
 
     override fun disconnected(event: DisconnectedEvent) {
         state = GameSession.State.DISCONNECTED
+        notify("Disconnected", event.reason)
         warn("Client", "Disconnected: ${event.reason}")
         listeners.forEach { it.onDisconnect(event.reason) }
     }
@@ -258,6 +261,7 @@ class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter()
     }
 
     private fun registerModules() {
+        register(SafetyModule(this))
         register(AutoFishModule(this))
     }
 
@@ -275,7 +279,7 @@ class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter()
         modules.clear()
     }
 
-    private fun log(
+    fun log(
         scope: String?,
         content: CharSequence,
         level: GameSession.LogLevel = GameSession.LogLevel.INFO
@@ -286,14 +290,22 @@ class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter()
         this.log.postValue(new)
     }
 
-    private fun warn(scope: String?, content: CharSequence) =
+    fun warn(scope: String?, content: CharSequence) =
         log(scope, content, GameSession.LogLevel.WARNING)
 
-    private fun error(scope: String?, content: CharSequence) =
+    fun error(scope: String?, content: CharSequence) =
         log(scope, content, GameSession.LogLevel.ERROR)
 
-    private fun success(
+    fun success(
         scope: String?,
         content: CharSequence
     ) = log(scope, content, GameSession.LogLevel.SUCCESS)
+
+    fun notify(
+        title: CharSequence,
+        content: CharSequence,
+        priority: Int = NotificationCompat.PRIORITY_DEFAULT
+    ) {
+        listeners.forEach { it.notify(this, title, content, priority) }
+    }
 }

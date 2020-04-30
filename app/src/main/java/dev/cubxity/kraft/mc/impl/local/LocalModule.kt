@@ -27,6 +27,6 @@ abstract class LocalModule(
     enabledByDefault: Boolean = false
 ) : Module {
     override var isEnabled = enabledByDefault
-    
-    abstract fun onPacket(packet: Packet)
+
+    open fun onPacket(packet: Packet) {}
 }

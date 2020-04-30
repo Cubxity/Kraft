@@ -18,29 +18,22 @@
 
 package dev.cubxity.kraft.service
 
-import android.app.*
-import android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
-import android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE
+import android.app.Notification
+import android.app.NotificationManager
+import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.os.Binder
-import android.os.Build
+import android.text.Spanned
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
-import com.github.steveice10.mc.auth.service.AuthenticationService
-import com.github.steveice10.mc.protocol.data.message.Message
 import dev.cubxity.kraft.R
-import dev.cubxity.kraft.db.entity.Session
 import dev.cubxity.kraft.db.entity.SessionWithAccount
 import dev.cubxity.kraft.mc.GameSession
 import dev.cubxity.kraft.mc.impl.local.LocalGameSession
-import dev.cubxity.kraft.utils.clientToken
 import dev.cubxity.kraft.utils.db
 import dev.cubxity.kraft.utils.refreshAndConnect
 import kotlinx.coroutines.*
-import java.util.concurrent.ConcurrentHashMap
 
 class KraftService : Service(), CoroutineScope, GameSession.Listener {
     override val coroutineContext = Dispatchers.IO + Job()
@@ -54,6 +47,7 @@ class KraftService : Service(), CoroutineScope, GameSession.Listener {
 
     private val binder = KraftBinder()
     private var isForeground: Boolean = false
+    private var notificationId = NOTIFICATION_ID + 1
 
     val sessions = HashMap<Int, LocalGameSession>()
 
@@ -114,8 +108,24 @@ class KraftService : Service(), CoroutineScope, GameSession.Listener {
         }
     }
 
-    override fun onChat(message: Message) {
+    override fun notify(
+        session: GameSession,
+        title: CharSequence,
+        content: CharSequence,
+        priority: Int
+    ) {
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_baseline_dashboard_24)
+            .setContentTitle(title)
+            .setContentText(content)
+            .setGroup(session.info.session.id?.toString())
+            .setContentInfo(session.info.session.name)
+            .setPriority(priority)
+            .build()
 
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(notificationId++, notification)
     }
 
     suspend fun createSession(session: SessionWithAccount): LocalGameSession =

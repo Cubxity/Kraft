@@ -18,6 +18,7 @@
 
 package dev.cubxity.kraft.mc
 
+import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LiveData
 import com.github.steveice10.mc.auth.data.GameProfile
 import com.github.steveice10.mc.protocol.data.message.Message
@@ -91,6 +92,17 @@ interface GameSession {
          * Called when a module is added or updated
          */
         fun onModuleUpdate(module: Module) {}
+
+        /**
+         * Send push notification
+         */
+        fun notify(
+            session: GameSession,
+            title: CharSequence,
+            content: CharSequence,
+            priority: Int = NotificationCompat.PRIORITY_DEFAULT
+        ) {
+        }
     }
 
     data class LogEntry(

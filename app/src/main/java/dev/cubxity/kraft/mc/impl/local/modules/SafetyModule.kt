@@ -16,23 +16,26 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package dev.cubxity.kraft.mc
+package dev.cubxity.kraft.mc.impl.local.modules
 
-import android.content.Context
-import androidx.lifecycle.LifecycleOwner
-import androidx.preference.PreferenceCategory
+import androidx.core.app.NotificationCompat
+import dev.cubxity.kraft.mc.GameSession
+import dev.cubxity.kraft.mc.entitiy.SelfPlayer
+import dev.cubxity.kraft.mc.impl.local.LocalGameSession
+import dev.cubxity.kraft.mc.impl.local.LocalModule
 
-interface Module {
-    val id: String
-
-    val name: String
-
-    var isEnabled: Boolean
-
-    fun buildPreferences(
-        ctx: Context,
-        lifecycleOwner: LifecycleOwner,
-        preferences: PreferenceCategory
-    ) {
+class SafetyModule(private val session: LocalGameSession) : LocalModule("safety", "Safety", true),
+    GameSession.Listener {
+    override fun onHealthUpdate(player: SelfPlayer) {
+        if (isEnabled) {
+            if (player.health < 5F) {
+                session.disconnect()
+                session.notify(
+                    "You have been disconnected.",
+                    "Your health was below 5HP and you have been automatically disconnected.",
+                    NotificationCompat.PRIORITY_HIGH
+                )
+            }
+        }
     }
 }

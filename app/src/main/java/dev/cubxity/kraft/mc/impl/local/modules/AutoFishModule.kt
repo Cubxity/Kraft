@@ -73,10 +73,6 @@ class AutoFishModule(private val session: LocalGameSession) : LocalModule("autof
         preferences.addPreference(timerPref)
     }
 
-    override fun onPacket(packet: Packet) {
-
-    }
-
     override fun onTick() {
         if (waitingTicks == 0)
             if (isEnabled) {
