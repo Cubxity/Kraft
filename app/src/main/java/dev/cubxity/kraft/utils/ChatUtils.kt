@@ -20,19 +20,29 @@ package dev.cubxity.kraft.utils
 
 import android.graphics.Typeface
 import android.text.SpannableStringBuilder
+import android.text.SpannedString
 import android.text.style.ForegroundColorSpan
 import android.text.style.StrikethroughSpan
 import android.text.style.StyleSpan
 import android.text.style.UnderlineSpan
 import androidx.core.text.buildSpannedString
-import com.github.steveice10.mc.protocol.data.message.ChatColor
-import com.github.steveice10.mc.protocol.data.message.ChatFormat
-import com.github.steveice10.mc.protocol.data.message.Message
-import com.github.steveice10.mc.protocol.data.message.MessageStyle
+import com.github.steveice10.mc.protocol.data.message.*
 import java.util.*
 
 object ChatUtils {
-    fun buildSpan(message: Message) = buildSpannedString {
+    val translations = mapOf(
+        "chat.stream.emote" to "(%s) * %s %s",
+        "chat.stream.text" to "(%s) <%s> %s",
+        "chat.type.achievement" to "%s has just earned the achievement %s",
+        "chat.type.admin" to "[%s: %s]",
+        "chat.type.announcement" to "[%s] %s",
+        "chat.type.emote" to "* %s %s",
+        "chat.type.text" to "<%s> %s",
+        "multiplayer.player.joined" to "%s joined the game.",
+        "multiplayer.player.left" to "%s left the game."
+    )
+
+    fun buildSpan(message: Message): SpannedString = buildSpannedString {
         val queue = LinkedList<Message>()
         queue += message
 
@@ -42,7 +52,17 @@ object ChatUtils {
             val style = msg.style
 
             val startIndex = length
-            append(msg.text)
+            if (msg is TranslationMessage) {
+                val translation = translations[msg.translationKey]
+                if (translation != null) {
+                    append(translation.format(*msg.translationParams.map { buildSpan(it) }
+                        .toTypedArray()))
+                } else {
+                    append(msg.text)
+                }
+            } else {
+                append(msg.text)
+            }
 
             applySpan(style, this, startIndex, length)
 
