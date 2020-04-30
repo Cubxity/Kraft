@@ -31,9 +31,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import dev.cubxity.kraft.R
-import dev.cubxity.kraft.db.entity.SessionWithAccount
 import dev.cubxity.kraft.mc.GameSession
 import kotlinx.android.synthetic.main.fragment_session.*
+import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
 class SessionFragment : Fragment() {
@@ -57,6 +57,20 @@ class SessionFragment : Fragment() {
         installSession(sessionViewModel.gameSession.value)
         sessionViewModel.gameSession.observe(viewLifecycleOwner, Observer {
             installSession(it)
+        })
+
+        health_progress.progress = sessionViewModel.health.value!!.roundToInt()
+        exp_progress.progress = (sessionViewModel.experience.value!! * 100.0).roundToInt()
+        exp_level.text = sessionViewModel.experienceLevel.value.toString()
+
+        sessionViewModel.health.observe(viewLifecycleOwner, Observer {
+            health_progress.progress = it.roundToInt()
+        })
+        sessionViewModel.experience.observe(viewLifecycleOwner, Observer {
+            exp_progress.progress = (it * 100.0).roundToInt()
+        })
+        sessionViewModel.experienceLevel.observe(viewLifecycleOwner, Observer {
+            exp_level.text = "$it"
         })
 
         chat_input.setOnEditorActionListener { v, actionId, _ ->

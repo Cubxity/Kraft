@@ -34,6 +34,7 @@ import com.github.steveice10.mc.protocol.packet.ingame.server.entity.ServerEntit
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.ServerEntityVelocityPacket
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerHealthPacket
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket
+import com.github.steveice10.mc.protocol.packet.ingame.server.entity.player.ServerPlayerSetExperiencePacket
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnObjectPacket
 import com.github.steveice10.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnPlayerPacket
 import com.github.steveice10.packetlib.Client
@@ -169,6 +170,7 @@ class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter()
                     health = packet.health
                     food = packet.food
                     foodSaturation = packet.saturation
+                    listeners.forEach { it.onHealthUpdate(this) }
                 }
             }
             is ServerPlayerPositionRotationPacket -> {
@@ -221,6 +223,14 @@ class LocalGameSession(override val info: SessionWithAccount) : SessionAdapter()
                 entities[packet.entityId] = entity
 
                 listeners.forEach { it.onEntitySpawn(entity) }
+            }
+            is ServerPlayerSetExperiencePacket -> {
+                player?.apply {
+                    experienceBar = packet.experience
+                    totalExperience = packet.totalExperience
+                    level = packet.level
+                    listeners.forEach { it.onExpUpdate(this) }
+                }
             }
             is ServerEntityDestroyPacket -> {
                 packet.entityIds.forEach { entityId ->

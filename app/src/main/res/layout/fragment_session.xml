@@ -54,10 +54,60 @@
             tools:text="[Client] Connecting...\n[Client] Connected to hypixel.net:25565" />
     </ScrollView>
 
+    <ProgressBar
+        android:id="@+id/exp_progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        android:layout_margin="8dp"
+        android:background="@drawable/rounded_background"
+        android:max="100"
+        android:progressDrawable="@drawable/exp_circle"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@id/chat_input"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:progress="67" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/exp_level"
+        style="@style/TextAppearance.MaterialComponents.Overline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@id/exp_progress"
+        app:layout_constraintEnd_toEndOf="@id/exp_progress"
+        app:layout_constraintStart_toStartOf="@id/exp_progress"
+        app:layout_constraintTop_toTopOf="@id/exp_progress"
+        tools:text="27" />
+
+    <ProgressBar
+        android:id="@+id/health_progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        android:layout_margin="8dp"
+        android:background="@drawable/rounded_background"
+        android:max="20"
+        android:progressDrawable="@drawable/health_circle"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@id/exp_progress"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:progress="19" />
+
+    <ImageView
+        style="@style/TextAppearance.MaterialComponents.Overline"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:src="@drawable/ic_baseline_favorite_24"
+        app:layout_constraintBottom_toBottomOf="@id/health_progress"
+        app:layout_constraintEnd_toEndOf="@id/health_progress"
+        app:layout_constraintStart_toStartOf="@id/health_progress"
+        app:layout_constraintTop_toTopOf="@id/health_progress" />
+
     <com.google.android.material.textfield.TextInputEditText
         android:id="@+id/chat_input"
+        style="@style/TextAppearance.MaterialComponents.Body1"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="42dp"
         android:layout_margin="8dp"
         android:background="@drawable/rounded_background"
         android:hint="@string/chat_hint"

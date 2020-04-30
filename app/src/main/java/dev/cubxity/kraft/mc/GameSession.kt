@@ -69,6 +69,10 @@ interface GameSession {
 
         fun onChat(message: Message) {}
 
+        fun onHealthUpdate(player: SelfPlayer) {}
+
+        fun onExpUpdate(player: SelfPlayer) {}
+
         fun onEntityVelocity(
             entity: Entity,
             velocityX: Double,

@@ -24,4 +24,10 @@ interface SelfPlayer : Player {
     var food: Int
 
     var foodSaturation: Float
+
+    var experienceBar: Float
+
+    var totalExperience: Int
+
+    var level: Int
 }

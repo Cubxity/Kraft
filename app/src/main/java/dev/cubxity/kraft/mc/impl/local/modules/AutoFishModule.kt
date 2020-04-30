@@ -84,7 +84,7 @@ class AutoFishModule(private val session: LocalGameSession) : LocalModule("autof
                     currentBobber == null -> {
                         // Cast
                         session.client?.session?.send(ClientPlayerUseItemPacket(Hand.MAIN_HAND))
-                        waitingTicks += 5
+                        waitingTicks += 15
                     }
                     queuedRecast -> {
                         session.client?.session?.send(ClientPlayerUseItemPacket(Hand.MAIN_HAND))
@@ -131,7 +131,7 @@ class AutoFishModule(private val session: LocalGameSession) : LocalModule("autof
         // Wait until the bobber lands on the water
         if (waitingTicks == 0 && entity == currentBobber && !queuedRecast) {
             val velocity = abs(velocityY)
-            if (velocity > 0.1) {
+            if (velocity > 0.07) {
                 Log.d(TAG, "Recasting, velocity: $velocity")
                 queuedRecast = true
                 recasts.postValue(recasts.value!! + 1)

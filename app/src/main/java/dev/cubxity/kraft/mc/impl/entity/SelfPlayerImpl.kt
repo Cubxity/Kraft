@@ -27,4 +27,10 @@ class SelfPlayerImpl(entityId: Int, uuid: UUID) : BaseEntity(entityId, uuid), Se
     override var food = 0
 
     override var foodSaturation = 0F
+
+    override var experienceBar = 0F
+
+    override var totalExperience = 0
+
+    override var level = 0
 }
