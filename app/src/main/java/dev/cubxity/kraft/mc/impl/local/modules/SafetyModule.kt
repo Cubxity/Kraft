@@ -28,13 +28,20 @@ class SafetyModule(private val session: LocalGameSession) : LocalModule("safety"
     GameSession.Listener {
     override fun onHealthUpdate(player: SelfPlayer) {
         if (isEnabled) {
-            if (player.health < 5F) {
+            if (player.health < 15F) {
                 session.disconnect()
-                session.notify(
-                    "You have been disconnected.",
-                    "Your health was below 5HP and you have been automatically disconnected.",
-                    NotificationCompat.PRIORITY_HIGH
-                )
+                if (player.health == 0F)
+                    session.notify(
+                        "You have been disconnected.",
+                        "You died you have been automatically disconnected.",
+                        NotificationCompat.PRIORITY_HIGH
+                    )
+                else
+                    session.notify(
+                        "You have been disconnected.",
+                        "Your health was below 15HP and you have been automatically disconnected.",
+                        NotificationCompat.PRIORITY_HIGH
+                    )
             }
         }
     }

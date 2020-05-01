@@ -51,7 +51,7 @@ class KraftService : Service(), CoroutineScope, GameSession.Listener {
 
     val sessions = HashMap<Int, LocalGameSession>()
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onCreate() {
         launch {
             val sessions = db.sessionsDao().getSessionsWithAccount()
 
@@ -66,7 +66,6 @@ class KraftService : Service(), CoroutineScope, GameSession.Listener {
                 }
             }
         }
-        return super.onStartCommand(intent, flags, startId)
     }
 
     override fun onDestroy() {
